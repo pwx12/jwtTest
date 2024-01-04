@@ -155,6 +155,56 @@ using Microsoft.IdentityModel.Tokens;
         rsa.FromXmlString(key);
 
         return rsa.ExportParameters(true);
-    }
+}
+
+
+
+
+
+//-------------------------------- Read pem file
+//using System;
+//using System.IO;
+//using Org.BouncyCastle.Crypto;
+//using Org.BouncyCastle.OpenSsl;
+
+//class Program
+//{
+//    static void Main()
+//    {
+//        string privateKeyPath = "path/to/private_key.pem";
+
+//        try
+//        {
+//            AsymmetricCipherKeyPair keyPair = ReadPrivateKey(privateKeyPath);
+
+//            // Now you have the private key in the keyPair variable
+//            // You can use it for cryptographic operations as needed
+//            Console.WriteLine("Private key read successfully.");
+//        }
+//        catch (Exception ex)
+//        {
+//            Console.WriteLine($"Error reading private key: {ex.Message}");
+//        }
+//    }
+
+//    static AsymmetricCipherKeyPair ReadPrivateKey(string privateKeyPath)
+//    {
+//        using (StreamReader reader = new StreamReader(privateKeyPath))
+//        {
+//            PemReader pemReader = new PemReader(reader);
+//            object obj = pemReader.ReadObject();
+
+//            if (obj is AsymmetricCipherKeyPair)
+//            {
+//                return (AsymmetricCipherKeyPair)obj;
+//            }
+//            else
+//            {
+//                throw new InvalidOperationException("The PEM file does not contain a private key.");
+//            }
+//        }
+//    }
+//}
+
 
 
