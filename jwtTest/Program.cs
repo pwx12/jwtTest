@@ -159,90 +159,90 @@
 //}
 
 
-using System;
-using System.IO;
-using System.Security.Cryptography;
-//using System.Security.Cryptography.X509Certificates;
-using System.Text;
-using System.IdentityModel.Tokens.Jwt;
-//using BouncyCastle.Crypto;
-//using BouncyCastle.Crypto.Parameters;
-//using BouncyCastle.Security;
-using Microsoft.IdentityModel.Tokens;
+//using System;
+//using System.IO;
+//using System.Security.Cryptography;
+////using System.Security.Cryptography.X509Certificates;
+//using System.Text;
+//using System.IdentityModel.Tokens.Jwt;
+////using BouncyCastle.Crypto;
+////using BouncyCastle.Crypto.Parameters;
+////using BouncyCastle.Security;
+//using Microsoft.IdentityModel.Tokens;
 
-class RS256TokenGenerator
-{
-    static void Main()
-    {
-        // Replace with the paths to your PEM files
-        string privateKeyPath = @"C:\Users\misie\OneDrive\Desktop\key\prv8.pem";
-        string publicKeyPath = @"C:\Users\misie\OneDrive\Desktop\key\pub8.pem";
+//class RS256TokenGenerator
+//{
+//    static void Main()
+//    {
+//        // Replace with the paths to your PEM files
+//        string privateKeyPath = @"C:\Users\misie\OneDrive\Desktop\key\prv8.pem";
+//        string publicKeyPath = @"C:\Users\misie\OneDrive\Desktop\key\pub8.pem";
 
-        // Load private key from PEM file
-        RSA privateKey = LoadPrivateKey(privateKeyPath);
+//        // Load private key from PEM file
+//        RSA privateKey = LoadPrivateKey(privateKeyPath);
 
-        // Load public key from PEM file
-        RSA publicKey = LoadPublicKey(publicKeyPath);
+//        // Load public key from PEM file
+//        RSA publicKey = LoadPublicKey(publicKeyPath);
 
-        // Create JWT token
-        string jwt = GenerateJwt(privateKey, publicKey);
+//        // Create JWT token
+//        string jwt = GenerateJwt(privateKey, publicKey);
 
-        Console.WriteLine("Generated JWT: " + jwt);
-    }
+//        Console.WriteLine("Generated JWT: " + jwt);
+//    }
 
-    static RSA LoadPrivateKey(string privateKeyPath)
-    {
-        using (StreamReader reader = new StreamReader(privateKeyPath))
-        {
-            string privateKeyPem = reader.ReadToEnd();
-            var privateKeyBytes = Convert.FromBase64String(
-                privateKeyPem
-                    .Replace("-----BEGIN RSA PRIVATE KEY-----", "")
-                    .Replace("-----END RSA PRIVATE KEY-----", "")
-                    .Replace("\n", "")
-            );
+//    static RSA LoadPrivateKey(string privateKeyPath)
+//    {
+//        using (StreamReader reader = new StreamReader(privateKeyPath))
+//        {
+//            string privateKeyPem = reader.ReadToEnd();
+//            var privateKeyBytes = Convert.FromBase64String(
+//                privateKeyPem
+//                    .Replace("-----BEGIN RSA PRIVATE KEY-----", "")
+//                    .Replace("-----END RSA PRIVATE KEY-----", "")
+//                    .Replace("\n", "")
+//            );
 
-            var rsa = RSA.Create();
-            rsa.ImportRSAPrivateKey(privateKeyBytes, out _);
-            return rsa;
-        }
-    }
+//            var rsa = RSA.Create();
+//            rsa.ImportRSAPrivateKey(privateKeyBytes, out _);
+//            return rsa;
+//        }
+//    }
 
-    static RSA LoadPublicKey(string publicKeyPath)
-    {
-        using (StreamReader reader = new StreamReader(publicKeyPath))
-        {
-            string publicKeyPem = reader.ReadToEnd();
-            var publicKeyBytes = Convert.FromBase64String(
-                publicKeyPem
-                    .Replace("-----BEGIN PUBLIC KEY-----", "")
-                    .Replace("-----END PUBLIC KEY-----", "")
-                    .Replace("\n", "")
-            );
+//    static RSA LoadPublicKey(string publicKeyPath)
+//    {
+//        using (StreamReader reader = new StreamReader(publicKeyPath))
+//        {
+//            string publicKeyPem = reader.ReadToEnd();
+//            var publicKeyBytes = Convert.FromBase64String(
+//                publicKeyPem
+//                    .Replace("-----BEGIN PUBLIC KEY-----", "")
+//                    .Replace("-----END PUBLIC KEY-----", "")
+//                    .Replace("\n", "")
+//            );
 
-            var rsa = RSA.Create();
-            rsa.ImportSubjectPublicKeyInfo(publicKeyBytes, out _);
-            return rsa;
-        }
-    }
+//            var rsa = RSA.Create();
+//            rsa.ImportSubjectPublicKeyInfo(publicKeyBytes, out _);
+//            return rsa;
+//        }
+//    }
 
-    static string GenerateJwt(RSA privateKey, RSA publicKey)
-    {
-        var securityKey = new RsaSecurityKey(privateKey);
-        var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.RsaSha256);
+//    static string GenerateJwt(RSA privateKey, RSA publicKey)
+//    {
+//        var securityKey = new RsaSecurityKey(privateKey);
+//        var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.RsaSha256);
 
-        var tokenHandler = new JwtSecurityTokenHandler();
-        var jwtToken = tokenHandler.CreateJwtSecurityToken(
-            issuer: "your-issuer",
-            audience: "your-audience",
-            subject: new System.Security.Claims.ClaimsIdentity(new[] { new System.Security.Claims.Claim("sub", "subject") }),
-            expires: DateTime.UtcNow.AddHours(1),
-            signingCredentials: credentials
-        );
+//        var tokenHandler = new JwtSecurityTokenHandler();
+//        var jwtToken = tokenHandler.CreateJwtSecurityToken(
+//            issuer: "your-issuer",
+//            audience: "your-audience",
+//            subject: new System.Security.Claims.ClaimsIdentity(new[] { new System.Security.Claims.Claim("sub", "subject") }),
+//            expires: DateTime.UtcNow.AddHours(1),
+//            signingCredentials: credentials
+//        );
 
-        return tokenHandler.WriteToken(jwtToken);
-    }
-}
+//        return tokenHandler.WriteToken(jwtToken);
+//    }
+//}
 
 
 
@@ -293,6 +293,198 @@ class RS256TokenGenerator
 //        }
 //    }
 //}
+
+
+//--------------------
+
+//using System;
+//using System.IO;
+//using System.Security.Cryptography;
+//using System.Text;
+//using System.IdentityModel.Tokens.Jwt;
+//using Microsoft.IdentityModel.Tokens;
+
+//class Program
+//{
+//    static void Main()
+//    {
+//        // Replace these paths with the paths to your PEM files
+//        string privateKeyPath = "path/to/private-key.pem";
+//        string publicKeyPath = "path/to/public-key.pem";
+
+//        try
+//        {
+//            string privateKeyPEM = ReadKeyFromFile(privateKeyPath);
+//            string publicKeyPEM = ReadKeyFromFile(publicKeyPath);
+
+//            RSACryptoServiceProvider rsaPrivate = LoadRSAPrivateKey(privateKeyPEM);
+//            RSACryptoServiceProvider rsaPublic = LoadRSAPublicKey(publicKeyPEM);
+
+//            // Create a JWT token
+//            string jwtToken = GenerateJwt(rsaPrivate, rsaPublic);
+
+//            Console.WriteLine($"Generated JWT token:\n{jwtToken}");
+//        }
+//        catch (Exception ex)
+//        {
+//            Console.WriteLine($"An error occurred: {ex.Message}");
+//        }
+//    }
+
+//    static RSACryptoServiceProvider LoadRSAPrivateKey(string privateKeyPEM)
+//    {
+//        byte[] privateKeyBytes = Convert.FromBase64String(privateKeyPEM);
+
+//        using (RSACryptoServiceProvider rsa = new RSACryptoServiceProvider())
+//        {
+//            RSAParameters rsaParams = new RSAParameters();
+
+//            using (BinaryReader reader = new BinaryReader(new MemoryStream(privateKeyBytes)))
+//            {
+//                // Implementation of loading RSA private key similar to the previous example
+//                // ...
+
+//                // Use the LoadRSAPSSPrivateKey method from the previous example
+//                return LoadRSAPSSPrivateKey(privateKeyPEM);
+//            }
+//        }
+//    }
+
+//    static RSACryptoServiceProvider LoadRSAPublicKey(string publicKeyPEM)
+//    {
+//        byte[] publicKeyBytes = Convert.FromBase64String(publicKeyPEM);
+
+//        using (RSACryptoServiceProvider rsa = new RSACryptoServiceProvider())
+//        {
+//            RSAParameters rsaParams = new RSAParameters();
+
+//            using (BinaryReader reader = new BinaryReader(new MemoryStream(publicKeyBytes)))
+//            {
+//                // Implementation of loading RSA public key similar to the previous example
+//                // ...
+
+//                // Use the LoadRSAPublicKey method from the previous example
+//                return LoadRSAPublicKey(publicKeyPEM);
+//            }
+//        }
+//    }
+
+//    static string GenerateJwt(RSACryptoServiceProvider rsaPrivate, RSACryptoServiceProvider rsaPublic)
+//    {
+//        var securityKey = new RsaSecurityKey(rsaPrivate);
+
+//        var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.RsaSha256);
+
+//        var header = new JwtHeader(credentials);
+//        var payload = new JwtPayload
+//        {
+//            { "sub", "subject" },
+//            { "exp", DateTime.UtcNow.AddHours(1) }
+//            // Add additional claims as needed
+//        };
+
+//        var jwtToken = new JwtSecurityToken(header, payload);
+//        var jwtHandler = new JwtSecurityTokenHandler();
+
+//        return jwtHandler.WriteToken(jwtToken);
+//    }
+
+//    // Other helper methods similar to the previous example
+//    // ...
+//}
+
+
+//using System;
+//using System.IO;
+//using System.Security.Cryptography;
+//using System.Text;
+
+//class Program
+//{
+//    static void Main()
+//    {
+//        // Replace this path with the path to your PEM file containing the RSASSA-PSS private key
+//        string privateKeyPath = "path/to/private-key.pem";
+
+//        try
+//        {
+//            string privateKeyPEM = ReadKeyFromFile(privateKeyPath);
+
+//            RSA rsa = LoadRSASSAPSSPrivateKey(privateKeyPEM);
+
+//            // Now you can use the 'rsa' object for cryptographic operations
+
+//            Console.WriteLine("RSASSA-PSS private key loaded successfully.");
+//        }
+//        catch (Exception ex)
+//        {
+//            Console.WriteLine($"An error occurred: {ex.Message}");
+//        }
+//    }
+
+//    static RSA LoadRSASSAPSSPrivateKey(string privateKeyPEM)
+//    {
+//        byte[] privateKeyBytes = Convert.FromBase64String(privateKeyPEM);
+
+//        using (RSA rsa = RSA.Create())
+//        {
+//            RSAParameters rsaParams = new RSAParameters();
+
+//            // Assuming the private key is in PKCS#8 format
+//            if (PrivateKeyParser.TryReadPkcs8(privateKeyBytes, out var keyInfo))
+//            {
+//                rsaParams.Modulus = keyInfo.Modulus;
+//                rsaParams.Exponent = keyInfo.Exponent;
+//                rsaParams.D = keyInfo.D;
+//                rsaParams.P = keyInfo.P;
+//                rsaParams.Q = keyInfo.Q;
+//                rsaParams.DP = keyInfo.DP;
+//                rsaParams.DQ = keyInfo.DQ;
+//                rsaParams.InverseQ = keyInfo.InverseQ;
+
+//                rsa.ImportParameters(rsaParams);
+
+//                return rsa;
+//            }
+
+//            throw new InvalidOperationException("Failed to read RSASSA-PSS private key.");
+//        }
+//    }
+
+//    static string ReadKeyFromFile(string filePath)
+//    {
+//        using (StreamReader reader = new StreamReader(filePath))
+//        {
+//            StringBuilder keyBuilder = new StringBuilder();
+//            string line;
+
+//            // Skip the first line if it contains "-----BEGIN..."
+//            if ((line = reader.ReadLine()?.Trim())?.StartsWith("-----BEGIN") == true)
+//            {
+//                while ((line = reader.ReadLine()?.Trim()) != null && !line.StartsWith("-----END"))
+//                {
+//                    keyBuilder.AppendLine(line);
+//                }
+//            }
+
+//            return keyBuilder.ToString();
+//        }
+//    }
+//}
+
+//public static class PrivateKeyParser
+//{
+//    public static bool TryReadPkcs8(byte[] keyBytes, out RSAParameters keyInfo)
+//    {
+//        // Implementation to parse PKCS#8 private key
+//        // ...
+
+//        keyInfo = default;
+//        return false;
+//    }
+//}
+
+
 
 
 
