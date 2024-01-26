@@ -487,4 +487,59 @@
 
 
 
+//------------------------httpClient example--------
+using System;
+using System.Collections.Generic;
+using System.Net.Http;
+using System.Threading.Tasks;
+
+class Program
+{
+    static async Task Main()
+    {
+        // Replace the URL with the actual endpoint you want to post data to
+        string apiUrl = "https://example.com/api";
+
+        // Prepare the data you want to send as key-value pairs
+        var formData = new Dictionary<string, string>
+        {
+            { "key1", "value1" },
+            { "key2", "value2" }
+        };
+
+        // Create an instance of HttpClient
+        using (HttpClient httpClient = new HttpClient())
+        {
+            // Create FormUrlEncodedContent from the data
+            var content = new FormUrlEncodedContent(formData);
+
+            try
+            {
+                // Send the POST request
+                HttpResponseMessage response = await httpClient.PostAsync(apiUrl, content);
+
+                // Check if the request was successful
+                if (response.IsSuccessStatusCode)
+                {
+                    // Read and handle the response content
+                    string responseContent = await response.Content.ReadAsStringAsync();
+                    Console.WriteLine("Response: " + responseContent);
+                }
+                else
+                {
+                    Console.WriteLine("Error: " + response.StatusCode);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Exception: " + ex.Message);
+            }
+        }
+    }
+}
+
+
+
+
+
 
