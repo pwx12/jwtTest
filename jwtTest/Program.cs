@@ -1170,6 +1170,38 @@ namespace optyCrud_v2
 //}
 
 
+//< Entities >
+//    < Employee >
+//        < FirstName type = "string" length = "100" > John </ FirstName >
+   
+//           < LastName type = "string" length = "100" > Doe </ LastName >
+      
+//              < Age type = "int" nullable = "true" > 30 </ Age >
+         
+//                 < Salary type = "decimal" precision = "18,2" > 5000.50 </ Salary >
+            
+//                    < BirthDate type = "datetime" > 1993 - 05 - 12 </ BirthDate >
+             
+//                     < IsActive type = "bool" > true </ IsActive >
+              
+//                      < Department type = "string" length = "50" > IT </ Department >
+                 
+//                     </ Employee >
+                 
+
+//                     < Department >
+                 
+//                         < Name type = "string" length = "100" > Human Resources </ Name >
+                        
+//                                < Budget type = "decimal" precision = "18,2" > 1000000.00 </ Budget >
+                           
+//                                   < CreatedAt type = "datetime" > 2024 - 01 - 01 </ CreatedAt >
+                            
+//                                    < IsActive type = "bool" > true </ IsActive >
+                             
+//                                 </ Department >
+//                             </ Entities >
+
 
 
 
