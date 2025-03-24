@@ -487,56 +487,691 @@
 
 
 
-//------------------------httpClient example--------
+////------------------------httpClient example--------
+//using System;
+//using System.Collections.Generic;
+//using System.Net.Http;
+//using System.Threading.Tasks;
+
+//class Program
+//{
+//    static async Task Main()
+//    {
+//        // Replace the URL with the actual endpoint you want to post data to
+//        string apiUrl = "https://example.com/api";
+
+//        // Prepare the data you want to send as key-value pairs
+//        var formData = new Dictionary<string, string>
+//        {
+//            { "key1", "value1" },
+//            { "key2", "value2" }
+//        };
+
+//        // Create an instance of HttpClient
+//        using (HttpClient httpClient = new HttpClient())
+//        {
+//            // Create FormUrlEncodedContent from the data
+//            var content = new FormUrlEncodedContent(formData);
+
+//            try
+//            {
+//                // Send the POST request
+//                HttpResponseMessage response = await httpClient.PostAsync(apiUrl, content);
+
+//                // Check if the request was successful
+//                if (response.IsSuccessStatusCode)
+//                {
+//                    // Read and handle the response content
+//                    string responseContent = await response.Content.ReadAsStringAsync();
+//                    Console.WriteLine("Response: " + responseContent);
+//                }
+//                else
+//                {
+//                    Console.WriteLine("Error: " + response.StatusCode);
+//                }
+//            }
+//            catch (Exception ex)
+//            {
+//                Console.WriteLine("Exception: " + ex.Message);
+//            }
+//        }
+//    }
+//}
+
+
+
+
 using System;
-using System.Collections.Generic;
-using System.Net.Http;
-using System.Threading.Tasks;
+using System.IO;
+using System.Linq;
+using System.Text;
+using System.Xml.Linq;
+using System.Text.RegularExpressions;
 
-class Program
+namespace optyCrud_v2
 {
-    static async Task Main()
+    class Program
     {
-        // Replace the URL with the actual endpoint you want to post data to
-        string apiUrl = "https://example.com/api";
-
-        // Prepare the data you want to send as key-value pairs
-        var formData = new Dictionary<string, string>
+        static void Main()
         {
-            { "key1", "value1" },
-            { "key2", "value2" }
-        };
+            Console.Write("Podaj ścieżkę do pliku XML: ");
+            string xmlPath = Console.ReadLine()?.Trim();
 
-        // Create an instance of HttpClient
-        using (HttpClient httpClient = new HttpClient())
-        {
-            // Create FormUrlEncodedContent from the data
-            var content = new FormUrlEncodedContent(formData);
+            if (string.IsNullOrWhiteSpace(xmlPath) || !File.Exists(xmlPath))
+            {
+                Console.WriteLine("Nieprawidłowa ścieżka do pliku XML.");
+                return;
+            }
+
+            Console.Write("Podaj nazwę encji (np. Employee): ");
+            string className = Console.ReadLine()?.Trim();
+            if (string.IsNullOrWhiteSpace(className))
+            {
+                Console.WriteLine("Nazwa klasy nie może być pusta.");
+                return;
+            }
+
+            Console.Write("Czy wygenerować kod SQL? (tak/nie): ");
+            bool generateSql = Console.ReadLine()?.Trim().ToLower() == "tak";
+
+            // Struktura katalogów
+            string baseDir = "GeneratedProject";
+            string controllersDir = Path.Combine(baseDir, "Controllers");
+            string servicesDir = Path.Combine(baseDir, "Services");
+            string repositoriesDir = Path.Combine(baseDir, "Repositories");
+            string modelsDir = Path.Combine(baseDir, "Models");
+            string dataDir = Path.Combine(baseDir, "Data");
+
+            Directory.CreateDirectory(baseDir);
+            Directory.CreateDirectory(controllersDir);
+            Directory.CreateDirectory(servicesDir);
+            Directory.CreateDirectory(repositoriesDir);
+            Directory.CreateDirectory(modelsDir);
+            Directory.CreateDirectory(dataDir);
+
+            // Ścieżki do plików
+            string modelPath = Path.Combine(modelsDir, $"{className}.cs");
+            string entityPath = Path.Combine(modelsDir, $"{className}Entity.cs");
+            string repositoryInterfacePath = Path.Combine(repositoriesDir, $"I{className}Repository.cs");
+            string repositoryPath = Path.Combine(repositoriesDir, $"{className}Repository.cs");
+            string serviceInterfacePath = Path.Combine(servicesDir, $"I{className}Service.cs");
+            string servicePath = Path.Combine(servicesDir, $"{className}Service.cs");
+            string controllerPath = Path.Combine(controllersDir, $"{className}Controller.cs");
+            string dbContextPath = Path.Combine(dataDir, "ApplicationDbContext.cs");
+            string sqlPath = Path.Combine(baseDir, $"{className}.sql");
 
             try
             {
-                // Send the POST request
-                HttpResponseMessage response = await httpClient.PostAsync(apiUrl, content);
+                XDocument xmlDoc = XDocument.Load(xmlPath);
+                var rootElement = xmlDoc.Root;
+                if (rootElement == null || !rootElement.Elements().Any())
+                {
+                    Console.WriteLine("Brak danych w XML.");
+                    return;
+                }
 
-                // Check if the request was successful
-                if (response.IsSuccessStatusCode)
+                var firstElement = rootElement.Elements().First();
+
+                // Tworzenie Modelu
+                StringBuilder modelBuilder = new StringBuilder();
+                modelBuilder.AppendLine("using System;");
+                modelBuilder.AppendLine($"public class {className}");
+                modelBuilder.AppendLine("{");
+
+                StringBuilder entityBuilder = new StringBuilder();
+                entityBuilder.AppendLine("using System;");
+                entityBuilder.AppendLine($"public class {className}Entity");
+                entityBuilder.AppendLine("{");
+
+                StringBuilder sqlBuilder = new StringBuilder();
+                if (generateSql)
                 {
-                    // Read and handle the response content
-                    string responseContent = await response.Content.ReadAsStringAsync();
-                    Console.WriteLine("Response: " + responseContent);
+                    sqlBuilder.AppendLine($"CREATE TABLE {className} (");
+                    sqlBuilder.AppendLine("    ID INT IDENTITY(1,1) PRIMARY KEY,");
                 }
-                else
+
+                foreach (var element in firstElement.Elements())
                 {
-                    Console.WriteLine("Error: " + response.StatusCode);
+                    string propertyName = element.Name.LocalName;
+                    string screamingSnakeCaseName = ToScreamingSnakeCase(propertyName);
+                    string xmlType = element.Attribute("type")?.Value ?? "string";
+                    string csharpType = ConvertToCSharpType(xmlType);
+                    string sqlType = ConvertToSqlType(xmlType, element);
+
+                    modelBuilder.AppendLine($"    public {csharpType} {propertyName} {{ get; set; }}");
+                    entityBuilder.AppendLine($"    public {csharpType} {screamingSnakeCaseName} {{ get; set; }}");
+
+                    if (generateSql)
+                        sqlBuilder.AppendLine($"    {screamingSnakeCaseName} {sqlType} NOT NULL,");
                 }
+
+                modelBuilder.AppendLine("}");
+                entityBuilder.AppendLine("}");
+                if (generateSql)
+                {
+                    sqlBuilder.Length -= 3;
+                    sqlBuilder.AppendLine("\n);");
+                }
+
+                File.WriteAllText(modelPath, modelBuilder.ToString());
+                File.WriteAllText(entityPath, entityBuilder.ToString());
+                if (generateSql) File.WriteAllText(sqlPath, sqlBuilder.ToString());
+
+                // Tworzenie plików dla warstw aplikacji
+                File.WriteAllText(repositoryInterfacePath, $"public interface I{className}Repository {{ }}");
+                File.WriteAllText(repositoryPath, $"public class {className}Repository : I{className}Repository {{ }}");
+
+                File.WriteAllText(serviceInterfacePath, $"public interface I{className}Service {{ }}");
+                File.WriteAllText(servicePath, $"public class {className}Service : I{className}Service {{ }}");
+
+                File.WriteAllText(controllerPath, $@"
+                    using Microsoft.AspNetCore.Mvc;
+
+                    [Route(""api/[controller]"")]
+                    [ApiController]
+                    public class {className}Controller : ControllerBase
+                    {{
+                        private readonly I{className}Service _service;
+
+                        public {className}Controller(I{className}Service service)
+                        {{
+                            _service = service;
+                        }}
+                    }}
+                    ");
+
+                File.WriteAllText(dbContextPath, $@"
+                    using Microsoft.EntityFrameworkCore;
+
+                    public class ApplicationDbContext : DbContext
+                    {{
+                        public DbSet<{className}Entity> {className}s {{ get; set; }}
+
+                        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options) {{ }}
+                    }}
+                    ");
+
+                Console.WriteLine($"Struktura katalogów dla projektu CRUD została wygenerowana w {baseDir}.");
             }
             catch (Exception ex)
             {
-                Console.WriteLine("Exception: " + ex.Message);
+                Console.WriteLine("Błąd podczas przetwarzania: " + ex.Message);
             }
+        }
+
+        static string ConvertToCSharpType(string xmlType)
+        {
+            switch (xmlType.ToLower())
+            {
+                case "int":
+                    return "int";
+                case "decimal":
+                    return "decimal";
+                case "datetime":
+                    return "DateTime";
+                case "bool":
+                    return "bool";
+                default:
+                    return "string";
+
+            };
+        }
+
+        static string ConvertToSqlType(string xmlType, XElement element)
+        {
+            string length = element.Attribute("length")?.Value;
+            string precision = element.Attribute("precision")?.Value;
+
+            switch (xmlType.ToLower())
+            {
+                case "int": return "INT";
+                case "decimal": return precision != null ? $"DECIMAL({precision})" : "DECIMAL(18,2)";
+                case "float": return "FLOAT";
+                case "double": return "DOUBLE PRECISION";
+                case "datetime": return "DATETIME";
+                case "bool": return "BIT";
+                case "char": return length != null ? $"CHAR({length})" : "CHAR(1)";
+                case "string": return length != null ? $"NVARCHAR({length})" : "NVARCHAR(255)";
+                default:
+                    throw new Exception("Błąd");
+            };
+        }
+
+        static string ToScreamingSnakeCase(string input)
+        {
+            return Regex.Replace(input, "([a-z])([A-Z])", "$1_$2").ToUpper();
         }
     }
 }
+
+
+
+//using System;
+//using System.IO;
+//using System.Linq;
+//using System.Text;
+//using System.Xml.Linq;
+//using System.Collections.Generic;
+//using System.Text.RegularExpressions;
+
+
+//namespace optyCrud_v2
+//{
+//    class Program
+//    {
+//        static void Main()
+//        {
+//            Console.Write("Podaj ścieżkę do pliku XML: ");
+//            string xmlPath = Console.ReadLine()?.Trim();
+
+//            if (string.IsNullOrWhiteSpace(xmlPath) || !File.Exists(xmlPath))
+//            {
+//                Console.WriteLine("Nieprawidłowa ścieżka do pliku XML.");
+//                return;
+//            }
+
+//            Console.Write("Podaj nazwę encji (np. Employee): ");
+//            string className = Console.ReadLine()?.Trim();
+//            if (string.IsNullOrWhiteSpace(className))
+//            {
+//                Console.WriteLine("Nazwa klasy nie może być pusta.");
+//                return;
+//            }
+
+//            Console.Write("Czy wygenerować kod SQL? (tak/nie): ");
+//            bool generateSql = Console.ReadLine()?.Trim().ToLower() == "tak";
+
+//            // Struktura katalogów
+//            string baseDir = "GeneratedProject";
+//            string controllersDir = Path.Combine(baseDir, "Controllers");
+//            string servicesDir = Path.Combine(baseDir, "Services");
+//            string repositoriesDir = Path.Combine(baseDir, "Repositories");
+//            string modelsDir = Path.Combine(baseDir, "Models");
+//            string dataDir = Path.Combine(baseDir, "Data");
+//            string testsDir = Path.Combine(baseDir, "Tests");
+
+//            Directory.CreateDirectory(baseDir);
+//            Directory.CreateDirectory(controllersDir);
+//            Directory.CreateDirectory(servicesDir);
+//            Directory.CreateDirectory(repositoriesDir);
+//            Directory.CreateDirectory(modelsDir);
+//            Directory.CreateDirectory(dataDir);
+//            Directory.CreateDirectory(testsDir);
+
+//            // Ścieżki do plików
+//            string sqlPath = Path.Combine(baseDir, $"{className}.sql");
+//            string appSettingsPath = Path.Combine(baseDir, "appsettings.json");
+//            string swaggerPath = Path.Combine(baseDir, "swagger.yaml");
+//            string programPath = Path.Combine(baseDir, "Program.cs");
+
+//            try
+//            {
+//                // Generowanie `appsettings.json`
+//                File.WriteAllText(appSettingsPath, $@"
+//                {{
+//                  ""ConnectionStrings"": {{
+//                    ""DefaultConnection"": ""Server=localhost;Database={className}Db;Trusted_Connection=True;""
+//                  }}
+//                }}
+//                ");
+
+//                                // Generowanie Program.cs (Swagger)
+//                                File.WriteAllText(programPath, $@"
+//                                    using Microsoft.AspNetCore.Builder;
+//                                    using Microsoft.Extensions.DependencyInjection;
+//                                    using Microsoft.Extensions.Hosting;
+
+//                                    var builder = WebApplication.CreateBuilder(args);
+
+//                                    builder.Services.AddControllers();
+//                                    builder.Services.AddEndpointsApiExplorer();
+//                                    builder.Services.AddSwaggerGen();
+
+//                                    var app = builder.Build();
+
+//                                    if (app.Environment.IsDevelopment())
+//                                    {{
+//                                        app.UseSwagger();
+//                                        app.UseSwaggerUI();
+//                                    }}
+
+//                                    app.UseAuthorization();
+//                                    app.MapControllers();
+//                                    app.Run();
+//                                    ");
+
+//                // Generowanie swagger.yaml
+//                File.WriteAllText(swaggerPath, $"openapi: 3.0.0\ninfo:\n  title: {className} API\n  version: 1.0.0");
+
+//                Console.WriteLine($"Projekt CRUD został wygenerowany w katalogu {baseDir}.");
+//            }
+//            catch (Exception ex)
+//            {
+//                Console.WriteLine("Błąd podczas przetwarzania: " + ex.Message);
+//            }
+//        }
+//    }
+//}
+
+
+
+using System;
+using System.IO;
+using System.Linq;
+using System.Text;
+using System.Xml.Linq;
+using System.Text.RegularExpressions;
+
+namespace optyCrud_v2
+{
+    class Program
+    {
+        static void Main()
+        {
+            Console.Write("Podaj ścieżkę do pliku XML: ");
+            string xmlPath = Console.ReadLine()?.Trim();
+
+            if (string.IsNullOrWhiteSpace(xmlPath) || !File.Exists(xmlPath))
+            {
+                Console.WriteLine("Nieprawidłowa ścieżka do pliku XML.");
+                return;
+            }
+
+            Console.Write("Podaj nazwę encji (np. Employee): ");
+            string className = Console.ReadLine()?.Trim();
+            if (string.IsNullOrWhiteSpace(className))
+            {
+                Console.WriteLine("Nazwa klasy nie może być pusta.");
+                return;
+            }
+
+            Console.Write("Czy wygenerować kod SQL? (tak/nie): ");
+            bool generateSql = Console.ReadLine()?.Trim().ToLower() == "tak";
+
+            // Struktura katalogów
+            string baseDir = "GeneratedProject";
+            string controllersDir = Path.Combine(baseDir, "Controllers");
+            string servicesDir = Path.Combine(baseDir, "Services");
+            string repositoriesDir = Path.Combine(baseDir, "Repositories");
+            string modelsDir = Path.Combine(baseDir, "Models");
+            string dataDir = Path.Combine(baseDir, "Data");
+
+            Directory.CreateDirectory(baseDir);
+            Directory.CreateDirectory(controllersDir);
+            Directory.CreateDirectory(servicesDir);
+            Directory.CreateDirectory(repositoriesDir);
+            Directory.CreateDirectory(modelsDir);
+            Directory.CreateDirectory(dataDir);
+
+            // Ścieżki do plików
+            string modelPath = Path.Combine(modelsDir, $"{className}.cs");
+            string entityPath = Path.Combine(modelsDir, $"{className}Entity.cs");
+            string repositoryInterfacePath = Path.Combine(repositoriesDir, $"I{className}Repository.cs");
+            string repositoryPath = Path.Combine(repositoriesDir, $"{className}Repository.cs");
+            string serviceInterfacePath = Path.Combine(servicesDir, $"I{className}Service.cs");
+            string servicePath = Path.Combine(servicesDir, $"{className}Service.cs");
+            string controllerPath = Path.Combine(controllersDir, $"{className}Controller.cs");
+            string dbContextPath = Path.Combine(dataDir, "ApplicationDbContext.cs");
+            string sqlPath = Path.Combine(baseDir, $"{className}.sql");
+
+            try
+            {
+                XDocument xmlDoc = XDocument.Load(xmlPath);
+                var rootElement = xmlDoc.Root;
+                if (rootElement == null || !rootElement.Elements().Any())
+                {
+                    Console.WriteLine("Brak danych w XML.");
+                    return;
+                }
+
+                var firstElement = rootElement.Elements().First();
+
+                // Tworzenie Modelu
+                StringBuilder modelBuilder = new StringBuilder();
+                modelBuilder.AppendLine("using System;");
+                modelBuilder.AppendLine($"public class {className}");
+                modelBuilder.AppendLine("{");
+
+                StringBuilder entityBuilder = new StringBuilder();
+                entityBuilder.AppendLine("using System;");
+                entityBuilder.AppendLine($"public class {className}Entity");
+                entityBuilder.AppendLine("{");
+
+                StringBuilder sqlBuilder = new StringBuilder();
+                if (generateSql)
+                {
+                    sqlBuilder.AppendLine($"CREATE TABLE {className} (");
+                    sqlBuilder.AppendLine("    ID INT IDENTITY(1,1) PRIMARY KEY,");
+                }
+
+                foreach (var element in firstElement.Elements())
+                {
+                    string propertyName = element.Name.LocalName;
+                    string screamingSnakeCaseName = ToScreamingSnakeCase(propertyName);
+                    string xmlType = element.Attribute("type")?.Value ?? "string";
+                    string csharpType = ConvertToCSharpType(xmlType);
+                    string sqlType = ConvertToSqlType(xmlType, element);
+
+                    modelBuilder.AppendLine($"    public {csharpType} {propertyName} {{ get; set; }}");
+                    entityBuilder.AppendLine($"    public {csharpType} {screamingSnakeCaseName} {{ get; set; }}");
+
+                    if (generateSql)
+                        sqlBuilder.AppendLine($"    {screamingSnakeCaseName} {sqlType} NOT NULL,");
+                }
+
+                modelBuilder.AppendLine("}");
+                entityBuilder.AppendLine("}");
+                if (generateSql)
+                {
+                    sqlBuilder.Length -= 3;
+                    sqlBuilder.AppendLine("\n);");
+                }
+
+                File.WriteAllText(modelPath, modelBuilder.ToString());
+                File.WriteAllText(entityPath, entityBuilder.ToString());
+                if (generateSql) File.WriteAllText(sqlPath, sqlBuilder.ToString());
+
+                // Tworzenie plików dla warstw aplikacji
+                File.WriteAllText(repositoryInterfacePath, $"public interface I{className}Repository {{ }}");
+                File.WriteAllText(repositoryPath, $"public class {className}Repository : I{className}Repository {{ }}");
+
+                File.WriteAllText(serviceInterfacePath, $"public interface I{className}Service {{ }}");
+                File.WriteAllText(servicePath, $"public class {className}Service : I{className}Service {{ }}");
+
+                File.WriteAllText(controllerPath, $@"
+                    using Microsoft.AspNetCore.Mvc;
+
+                    [Route(""api/[controller]"")]
+                    [ApiController]
+                    public class {className}Controller : ControllerBase
+                    {{
+                        private readonly I{className}Service _service;
+
+                        public {className}Controller(I{className}Service service)
+                        {{
+                            _service = service;
+                        }}
+                    }}
+                    ");
+
+                File.WriteAllText(dbContextPath, $@"
+                    using Microsoft.EntityFrameworkCore;
+
+                    public class ApplicationDbContext : DbContext
+                    {{
+                        public DbSet<{className}Entity> {className}s {{ get; set; }}
+
+                        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options) {{ }}
+                    }}
+                    ");
+
+                Console.WriteLine($"Struktura katalogów dla projektu CRUD została wygenerowana w {baseDir}.");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Błąd podczas przetwarzania: " + ex.Message);
+            }
+        }
+
+        static string ConvertToCSharpType(string xmlType)
+        {
+            switch (xmlType.ToLower())
+            {
+                case "int":
+                    return "int";
+                case "decimal":
+                    return "decimal";
+                case "datetime":
+                    return "DateTime";
+                case "bool":
+                    return "bool";
+                default:
+                    return "string";
+
+            };
+        }
+
+        static string ConvertToSqlType(string xmlType, XElement element)
+        {
+            string length = element.Attribute("length")?.Value;
+            string precision = element.Attribute("precision")?.Value;
+
+            switch (xmlType.ToLower())
+            {
+                case "int": return "INT";
+                case "decimal": return precision != null ? $"DECIMAL({precision})" : "DECIMAL(18,2)";
+                case "float": return "FLOAT";
+                case "double": return "DOUBLE PRECISION";
+                case "datetime": return "DATETIME";
+                case "bool": return "BIT";
+                case "char": return length != null ? $"CHAR({length})" : "CHAR(1)";
+                case "string": return length != null ? $"NVARCHAR({length})" : "NVARCHAR(255)";
+                default:
+                    throw new Exception("Błąd");
+            };
+        }
+
+        static string ToScreamingSnakeCase(string input)
+        {
+            return Regex.Replace(input, "([a-z])([A-Z])", "$1_$2").ToUpper();
+        }
+    }
+}
+
+
+
+
+
+//using System;
+//using System.IO;
+//using System.Linq;
+//using System.Text;
+//using System.Xml.Linq;
+//using System.Collections.Generic;
+//using System.Text.RegularExpressions;
+
+
+//namespace optyCrud_v2
+//{
+//    class Program
+//    {
+//        static void Main()
+//        {
+//            Console.Write("Podaj ścieżkę do pliku XML: ");
+//            string xmlPath = Console.ReadLine()?.Trim();
+
+//            if (string.IsNullOrWhiteSpace(xmlPath) || !File.Exists(xmlPath))
+//            {
+//                Console.WriteLine("Nieprawidłowa ścieżka do pliku XML.");
+//                return;
+//            }
+
+//            Console.Write("Podaj nazwę encji (np. Employee): ");
+//            string className = Console.ReadLine()?.Trim();
+//            if (string.IsNullOrWhiteSpace(className))
+//            {
+//                Console.WriteLine("Nazwa klasy nie może być pusta.");
+//                return;
+//            }
+
+//            Console.Write("Czy wygenerować kod SQL? (tak/nie): ");
+//            bool generateSql = Console.ReadLine()?.Trim().ToLower() == "tak";
+
+//            // Struktura katalogów
+//            string baseDir = "GeneratedProject";
+//            string controllersDir = Path.Combine(baseDir, "Controllers");
+//            string servicesDir = Path.Combine(baseDir, "Services");
+//            string repositoriesDir = Path.Combine(baseDir, "Repositories");
+//            string modelsDir = Path.Combine(baseDir, "Models");
+//            string dataDir = Path.Combine(baseDir, "Data");
+//            string testsDir = Path.Combine(baseDir, "Tests");
+
+//            Directory.CreateDirectory(baseDir);
+//            Directory.CreateDirectory(controllersDir);
+//            Directory.CreateDirectory(servicesDir);
+//            Directory.CreateDirectory(repositoriesDir);
+//            Directory.CreateDirectory(modelsDir);
+//            Directory.CreateDirectory(dataDir);
+//            Directory.CreateDirectory(testsDir);
+
+//            // Ścieżki do plików
+//            string sqlPath = Path.Combine(baseDir, $"{className}.sql");
+//            string appSettingsPath = Path.Combine(baseDir, "appsettings.json");
+//            string swaggerPath = Path.Combine(baseDir, "swagger.yaml");
+//            string programPath = Path.Combine(baseDir, "Program.cs");
+
+//            try
+//            {
+//                // Generowanie `appsettings.json`
+//                File.WriteAllText(appSettingsPath, $@"
+//                {{
+//                  ""ConnectionStrings"": {{
+//                    ""DefaultConnection"": ""Server=localhost;Database={className}Db;Trusted_Connection=True;""
+//                  }}
+//                }}
+//                ");
+
+//                                // Generowanie Program.cs (Swagger)
+//                                File.WriteAllText(programPath, $@"
+//                                    using Microsoft.AspNetCore.Builder;
+//                                    using Microsoft.Extensions.DependencyInjection;
+//                                    using Microsoft.Extensions.Hosting;
+
+//                                    var builder = WebApplication.CreateBuilder(args);
+
+//                                    builder.Services.AddControllers();
+//                                    builder.Services.AddEndpointsApiExplorer();
+//                                    builder.Services.AddSwaggerGen();
+
+//                                    var app = builder.Build();
+
+//                                    if (app.Environment.IsDevelopment())
+//                                    {{
+//                                        app.UseSwagger();
+//                                        app.UseSwaggerUI();
+//                                    }}
+
+//                                    app.UseAuthorization();
+//                                    app.MapControllers();
+//                                    app.Run();
+//                                    ");
+
+//                // Generowanie swagger.yaml
+//                File.WriteAllText(swaggerPath, $"openapi: 3.0.0\ninfo:\n  title: {className} API\n  version: 1.0.0");
+
+//                Console.WriteLine($"Projekt CRUD został wygenerowany w katalogu {baseDir}.");
+//            }
+//            catch (Exception ex)
+//            {
+//                Console.WriteLine("Błąd podczas przetwarzania: " + ex.Message);
+//            }
+//        }
+//    }
+//}
+
+
+
+
 
 
 
