@@ -1378,6 +1378,246 @@ public class {n}Controller : ControllerBase
 #endregion
 
 
+#region crud with sql
+using System;
+using System.IO;
+using System.Linq;
+using System.Text;
+using System.Xml.Linq;
+using System.Collections.Generic;
+using System.Text.RegularExpressions;
+
+class Program
+{
+    static void Main()
+    {
+        Console.Write("Podaj ścieżkę do pliku XML: ");
+        string xmlPath = Console.ReadLine()?.Trim();
+
+        if (string.IsNullOrWhiteSpace(xmlPath) || !File.Exists(xmlPath))
+        {
+            Console.WriteLine("Nieprawidłowa ścieżka do pliku XML.");
+            return;
+        }
+
+        Console.Write("Podaj nazwę encji (np. Employee): ");
+        string className = Console.ReadLine()?.Trim();
+
+        if (string.IsNullOrWhiteSpace(className))
+        {
+            Console.WriteLine("Nazwa klasy nie może być pusta.");
+            return;
+        }
+
+        // Folder structure
+        string baseDir = "GeneratedProject";
+        string[] folders = { "Models", "Repositories", "Services", "Controllers", "Data", "Tests" };
+        foreach (var folder in folders)
+            Directory.CreateDirectory(Path.Combine(baseDir, folder));
+
+        // File paths
+        string modelPath = Path.Combine(baseDir, "Models", $"{className}.cs");
+        string entityPath = Path.Combine(baseDir, "Models", $"{className}Entity.cs");
+        string sqlPath = Path.Combine(baseDir, $"{className}.sql");
+        string repoInterfacePath = Path.Combine(baseDir, "Repositories", $"I{className}Repository.cs");
+        string repoPath = Path.Combine(baseDir, "Repositories", $"{className}Repository.cs");
+        string serviceInterfacePath = Path.Combine(baseDir, "Services", $"I{className}Service.cs");
+        string servicePath = Path.Combine(baseDir, "Services", $"{className}Service.cs");
+        string controllerPath = Path.Combine(baseDir, "Controllers", $"{className}Controller.cs");
+        string dbContextPath = Path.Combine(baseDir, "Data", "ApplicationDbContext.cs");
+        string appSettingsPath = Path.Combine(baseDir, "appsettings.json");
+        string swaggerPath = Path.Combine(baseDir, "swagger.yaml");
+        string testPath = Path.Combine(baseDir, "Tests", $"{className}ServiceTests.cs");
+
+        // Read and parse XML
+        XDocument xmlDoc = XDocument.Load(xmlPath);
+        var entity = xmlDoc.Root?.Elements().FirstOrDefault();
+        if (entity == null)
+        {
+            Console.WriteLine("Brak encji w pliku XML.");
+            return;
+        }
+
+        var properties = new List<PropertyInfo>();
+        foreach (var prop in entity.Elements())
+        {
+            string name = prop.Name.LocalName;
+            string type = prop.Attribute("type")?.Value ?? "string";
+            string? length = prop.Attribute("length")?.Value;
+            string? precision = prop.Attribute("precision")?.Value;
+            bool nullable = prop.Attribute("nullable")?.Value == "true";
+
+            properties.Add(new PropertyInfo
+            {
+                Name = name,
+                XmlType = type,
+                Length = length,
+                Precision = precision,
+                Nullable = nullable
+            });
+        }
+
+        // Generate files
+        File.WriteAllText(modelPath, GenerateModel(className, properties));
+        File.WriteAllText(entityPath, GenerateEntity(className, properties));
+        File.WriteAllText(sqlPath, GenerateSql(className, properties));
+        File.WriteAllText(repoInterfacePath, $"public interface I{className}Repository {{\n{GenerateCrudSignatures(className)}\n}}");
+        File.WriteAllText(repoPath, GenerateRepository(className));
+        File.WriteAllText(serviceInterfacePath, $"public interface I{className}Service {{\n{GenerateCrudSignatures(className)}\n}}");
+        File.WriteAllText(servicePath, GenerateService(className));
+        File.WriteAllText(controllerPath, GenerateController(className));
+        File.WriteAllText(dbContextPath, GenerateDbContext(className));
+        File.WriteAllText(appSettingsPath, GenerateAppSettings(className));
+        File.WriteAllText(swaggerPath, GenerateSwaggerYaml(className));
+        File.WriteAllText(testPath, GenerateTest(className));
+
+        Console.WriteLine("✅ Wygenerowano projekt w katalogu: " + baseDir);
+    }
+
+    record PropertyInfo(string Name, string XmlType, string? Length, string? Precision, bool Nullable);
+
+    static string GenerateModel(string name, List<PropertyInfo> props) =>
+        $"public class {name}\n{{\n" +
+        string.Join("\n", props.Select(p => $"    public {ToCSharpType(p)} {p.Name} {{ get; set; }}")) +
+        "\n}";
+
+    static string GenerateEntity(string name, List<PropertyInfo> props) =>
+        $"public class {name}Entity\n{{\n" +
+        string.Join("\n", props.Select(p => $"    public {ToCSharpType(p)} {ToScreamingSnake(p.Name)} {{ get; set; }}")) +
+        "\n}";
+
+    static string GenerateSql(string table, List<PropertyInfo> props)
+    {
+        var sb = new StringBuilder();
+        sb.AppendLine($"CREATE TABLE {table} (");
+        sb.AppendLine("    ID INT IDENTITY(1,1) PRIMARY KEY,");
+        foreach (var p in props)
+        {
+            sb.AppendLine($"    {ToScreamingSnake(p.Name)} {ToSqlType(p)} {(p.Nullable ? "NULL" : "NOT NULL")},");
+        }
+        return sb.ToString().TrimEnd(',', '\n') + "\n);";
+    }
+
+    static string GenerateRepository(string name) =>
+$@"public class {name}Repository : I{name}Repository
+{{
+    private readonly ApplicationDbContext _context;
+
+    public {name}Repository(ApplicationDbContext context) => _context = context;
+
+    public IEnumerable<{name}Entity> GetAll() => _context.{name}s.ToList();
+    public {name}Entity GetById(int id) => _context.{name}s.Find(id);
+    public void Add({name}Entity entity) {{ _context.{name}s.Add(entity); _context.SaveChanges(); }}
+    public void Update(int id, {name}Entity entity) {{ _context.{name}s.Update(entity); _context.SaveChanges(); }}
+    public void Delete(int id) {{ var e = _context.{name}s.Find(id); _context.{name}s.Remove(e); _context.SaveChanges(); }}
+}}";
+
+    static string GenerateService(string name) =>
+$@"public class {name}Service : I{name}Service
+{{
+    private readonly I{name}Repository _repo;
+
+    public {name}Service(I{name}Repository repo) => _repo = repo;
+
+    public IEnumerable<{name}Entity> GetAll() => _repo.GetAll();
+    public {name}Entity GetById(int id) => _repo.GetById(id);
+    public void Add({name}Entity entity) => _repo.Add(entity);
+    public void Update(int id, {name}Entity entity) => _repo.Update(id, entity);
+    public void Delete(int id) => _repo.Delete(id);
+}}";
+
+    static string GenerateController(string name) =>
+$@"[ApiController]
+[Route(""api/[controller]"")]
+public class {name}Controller : ControllerBase
+{{
+    private readonly I{name}Service _service;
+
+    public {name}Controller(I{name}Service service) => _service = service;
+
+    [HttpGet] public IActionResult GetAll() => Ok(_service.GetAll());
+    [HttpGet(""{{id}}"")] public IActionResult GetById(int id) => Ok(_service.GetById(id));
+    [HttpPost] public IActionResult Create([FromBody] {name}Entity e) {{ _service.Add(e); return Ok(); }}
+    [HttpPut(""{{id}}"")] public IActionResult Update(int id, [FromBody] {name}Entity e) {{ _service.Update(id, e); return NoContent(); }}
+    [HttpDelete(""{{id}}"")] public IActionResult Delete(int id) {{ _service.Delete(id); return NoContent(); }}
+}}";
+
+    static string GenerateDbContext(string name) =>
+$@"using Microsoft.EntityFrameworkCore;
+public class ApplicationDbContext : DbContext
+{{
+    public DbSet<{name}Entity> {name}s {{ get; set; }}
+    public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options) {{ }}
+}}";
+
+    static string GenerateAppSettings(string db) =>
+$@"{{
+  ""ConnectionStrings"": {{
+    ""DefaultConnection"": ""Server=localhost;Database={db}Db;Trusted_Connection=True;""
+  }}
+}}";
+
+    static string GenerateSwaggerYaml(string entity) =>
+$@"openapi: 3.0.0
+info:
+  title: {entity} API
+  version: 1.0.0";
+
+    static string GenerateTest(string name) =>
+$@"using NUnit.Framework;
+using Moq;
+using System.Collections.Generic;
+using System.Linq;
+
+[TestFixture]
+public class {name}ServiceTests
+{{
+    [Test]
+    public void GetAll_ShouldReturnData()
+    {{
+        var mock = new Mock<I{name}Repository>();
+        mock.Setup(x => x.GetAll()).Returns(new List<{name}Entity> {{ new {name}Entity() }});
+        var service = new {name}Service(mock.Object);
+        var result = service.GetAll();
+        Assert.IsNotEmpty(result);
+    }}
+}}";
+
+    static string GenerateCrudSignatures(string name) =>
+$@"    IEnumerable<{name}Entity> GetAll();
+    {name}Entity GetById(int id);
+    void Add({name}Entity entity);
+    void Update(int id, {name}Entity entity);
+    void Delete(int id);";
+
+    static string ToCSharpType(PropertyInfo p) => (p.XmlType.ToLower()) switch
+    {
+        "int" => p.Nullable ? "int?" : "int",
+        "decimal" => p.Nullable ? "decimal?" : "decimal",
+        "datetime" => p.Nullable ? "DateTime?" : "DateTime",
+        "bool" => p.Nullable ? "bool?" : "bool",
+        _ => "string"
+    };
+
+    static string ToSqlType(PropertyInfo p) => (p.XmlType.ToLower()) switch
+    {
+        "int" => "INT",
+        "decimal" => p.Precision != null ? $"DECIMAL({p.Precision})" : "DECIMAL(18,2)",
+        "datetime" => "DATETIME",
+        "bool" => "BIT",
+        "string" => p.Length != null ? $"NVARCHAR({p.Length})" : "NVARCHAR(255)",
+        _ => "NVARCHAR(255)"
+    };
+
+    static string ToScreamingSnake(string input) => Regex.Replace(input, "([a-z])([A-Z])", "$1_$2").ToUpper();
+}
+
+
+
+
+#endregion
+
+
 
 
 
