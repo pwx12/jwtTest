@@ -1173,34 +1173,209 @@ namespace optyCrud_v2
 //< Entities >
 //    < Employee >
 //        < FirstName type = "string" length = "100" > John </ FirstName >
-   
+
 //           < LastName type = "string" length = "100" > Doe </ LastName >
-      
+
 //              < Age type = "int" nullable = "true" > 30 </ Age >
-         
+
 //                 < Salary type = "decimal" precision = "18,2" > 5000.50 </ Salary >
-            
+
 //                    < BirthDate type = "datetime" > 1993 - 05 - 12 </ BirthDate >
-             
+
 //                     < IsActive type = "bool" > true </ IsActive >
-              
+
 //                      < Department type = "string" length = "50" > IT </ Department >
-                 
+
 //                     </ Employee >
-                 
+
 
 //                     < Department >
-                 
+
 //                         < Name type = "string" length = "100" > Human Resources </ Name >
-                        
+
 //                                < Budget type = "decimal" precision = "18,2" > 1000000.00 </ Budget >
-                           
+
 //                                   < CreatedAt type = "datetime" > 2024 - 01 - 01 </ CreatedAt >
-                            
+
 //                                    < IsActive type = "bool" > true </ IsActive >
-                             
+
 //                                 </ Department >
 //                             </ Entities >
+
+
+
+#region crud v2
+
+
+using System;
+using System.IO;
+using System.Xml.Linq;
+using System.Linq;
+using System.Text;
+using System.Collections.Generic;
+using System.Text.RegularExpressions;
+
+class Program
+{
+    static void Main()
+    {
+        Console.Write("Podaj ścieżkę do pliku XML: ");
+        string xmlPath = Console.ReadLine()?.Trim();
+
+        Console.Write("Podaj nazwę encji (np. Employee): ");
+        string className = Console.ReadLine()?.Trim();
+
+        var baseDir = "GeneratedProject";
+        var dirs = new[]
+        {
+            "Models", "Models/Validators", "Services", "Repositories", "Controllers"
+        };
+
+        foreach (var dir in dirs)
+            Directory.CreateDirectory(Path.Combine(baseDir, dir));
+
+        var xml = XDocument.Load(xmlPath);
+        var props = xml.Root?.Elements().First().Elements()
+            .Select(x => new Property
+            {
+                Name = x.Name.LocalName,
+                Type = x.Attribute("type")?.Value ?? "string",
+                Nullable = x.Attribute("nullable")?.Value == "true",
+                Length = x.Attribute("length")?.Value,
+                Precision = x.Attribute("precision")?.Value
+            }).ToList();
+
+        File.WriteAllText($"{baseDir}/Models/{className}.cs", GenModel(className, props));
+        File.WriteAllText($"{baseDir}/Models/{className}Entity.cs", GenEntity(className, props));
+        File.WriteAllText($"{baseDir}/Models/Validators/{className}Validator.cs", GenValidator(className, props));
+        File.WriteAllText($"{baseDir}/Repositories/I{className}Repository.cs", GenRepoInterface(className));
+        File.WriteAllText($"{baseDir}/Repositories/{className}Repository.cs", GenRepo(className));
+        File.WriteAllText($"{baseDir}/Services/I{className}Service.cs", GenServiceInterface(className));
+        File.WriteAllText($"{baseDir}/Services/{className}Service.cs", GenService(className));
+        File.WriteAllText($"{baseDir}/Controllers/{className}Controller.cs", GenController(className));
+
+        Console.WriteLine("✅ Wszystko wygenerowane!");
+    }
+
+    class Property
+    {
+        public string Name;
+        public string Type;
+        public bool Nullable;
+        public string Length;
+        public string Precision;
+    }
+
+    static string CSharpType(Property p) => p.Type.ToLower() switch
+    {
+        "int" => p.Nullable ? "int?" : "int",
+        "decimal" => p.Nullable ? "decimal?" : "decimal",
+        "datetime" => p.Nullable ? "DateTime?" : "DateTime",
+        "bool" => p.Nullable ? "bool?" : "bool",
+        _ => "string"
+    };
+
+    static string SCREAM(string s) => Regex.Replace(s, "([a-z])([A-Z])", "$1_$2").ToUpper();
+
+    static string GenModel(string n, List<Property> p) =>
+        $"public class {n}\n{{\n" + string.Join("\n", p.Select(x => $"    public {CSharpType(x)} {x.Name} {{ get; set; }}")) + "\n}";
+
+    static string GenEntity(string n, List<Property> p) =>
+        $"public class {n}Entity\n{{\n" + string.Join("\n", p.Select(x => $"    public {CSharpType(x)} {SCREAM(x.Name)} {{ get; set; }}")) + "\n}";
+
+    static string GenValidator(string n, List<Property> p)
+    {
+        var sb = new StringBuilder();
+        sb.AppendLine("using FluentValidation;");
+        sb.AppendLine($"public class {n}Validator : AbstractValidator<{n}>");
+        sb.AppendLine("{");
+        sb.AppendLine($"    public {n}Validator()");
+        sb.AppendLine("    {");
+        foreach (var x in p)
+        {
+            var rule = $"        RuleFor(x => x.{x.Name})";
+            if (x.Type == "string")
+            {
+                rule += ".NotEmpty()";
+                if (x.Length != null) rule += $".MaximumLength({x.Length})";
+            }
+            else if (x.Type == "int" || x.Type == "decimal")
+                rule += ".GreaterThanOrEqualTo(0)";
+            else if (x.Type == "datetime")
+                rule += ".LessThan(DateTime.Now)";
+            sb.AppendLine(rule + ";");
+        }
+        sb.AppendLine("    }");
+        sb.AppendLine("}");
+        return sb.ToString();
+    }
+
+    static string GenRepoInterface(string n) =>
+$@"public interface I{n}Repository
+{{
+    IEnumerable<{n}> GetAll();
+    {n} GetById(int id);
+    void Create({n} dto);
+    void Update(int id, {n} dto);
+    void Delete(int id);
+}}";
+
+    static string GenRepo(string n) =>
+$@"public class {n}Repository : I{n}Repository
+{{
+    private readonly List<{n}> _list = new();
+    public IEnumerable<{n}> GetAll() => _list;
+    public {n} GetById(int id) => _list.ElementAtOrDefault(id);
+    public void Create({n} dto) => _list.Add(dto);
+    public void Update(int id, {n} dto) => _list[id] = dto;
+    public void Delete(int id) => _list.RemoveAt(id);
+}}";
+
+    static string GenServiceInterface(string n) =>
+$@"public interface I{n}Service
+{{
+    IEnumerable<{n}> GetAll();
+    {n} GetById(int id);
+    void Create({n} dto);
+    void Update(int id, {n} dto);
+    void Delete(int id);
+}}";
+
+    static string GenService(string n) =>
+$@"public class {n}Service : I{n}Service
+{{
+    private readonly I{n}Repository _repo;
+    public {n}Service(I{n}Repository repo) => _repo = repo;
+    public IEnumerable<{n}> GetAll() => _repo.GetAll();
+    public {n} GetById(int id) => _repo.GetById(id);
+    public void Create({n} dto) => _repo.Create(dto);
+    public void Update(int id, {n} dto) => _repo.Update(id, dto);
+    public void Delete(int id) => _repo.Delete(id);
+}}";
+
+    static string GenController(string n) =>
+$@"using Microsoft.AspNetCore.Mvc;
+
+[ApiController]
+[Route(""api/[controller]"")]
+public class {n}Controller : ControllerBase
+{{
+    private readonly I{n}Service _service;
+    public {n}Controller(I{n}Service service) => _service = service;
+
+    [HttpGet] public IActionResult GetAll() => Ok(_service.GetAll());
+    [HttpGet(""{{id}}"")] public IActionResult GetById(int id) => Ok(_service.GetById(id));
+    [HttpPost] public IActionResult Create([{""}FromBody] {n} dto) {{ _service.Create(dto); return Ok(); }}
+    [HttpPut(""{{id}}"")] public IActionResult Update(int id, [{""}FromBody] {n} dto) {{ _service.Update(id, dto); return NoContent(); }}
+    [HttpDelete(""{{id}}"")] public IActionResult Delete(int id) {{ _service.Delete(id); return NoContent(); }}
+}}";
+}
+
+
+
+
+
+#endregion
 
 
 
