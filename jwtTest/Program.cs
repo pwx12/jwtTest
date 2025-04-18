@@ -1615,6 +1615,92 @@ $@"    IEnumerable<{name}Entity> GetAll();
 
 
 
+pipeline
+{
+    agent any
+
+    options {
+        skipDefaultCheckout()
+    }
+
+    stages {
+        stage('Clean Workspace') {
+            steps {
+                deleteDir()
+            }
+        }
+
+        stage('Restore .NET Solution') {
+            steps {
+                bat 'MSBuild.exe /t:Restore D:\\jenkins_slave\\workspace\\OptyNew_ProjectCommon\\Optymalizator\\Migracja\\Optymalizator.NG.sln'
+            }
+        }
+
+        stage('npm install') {
+            steps {
+                bat 'cd D:\\jenkins_slave\\workspace\\OptyNew_ProjectCommon\\Optymalizator\\Migracja\\Optymalizator.Web.Client && npm install'
+            }
+        }
+
+        stage('Create Output Folders') {
+            steps {
+                bat 'cd D:\\jenkins_slave\\workspace\\OptyNew_ProjectCommon && md OPTY\\ServerApp\\net6 && md OPTY\\ServerApp\\netFramework && md OPTY\\ServerDB'
+            }
+        }
+
+        stage('npm build') {
+            steps {
+                bat 'cd D:\\jenkins_slave\\workspace\\OptyNew_ProjectCommon\\Optymalizator\\Migracja\\Optymalizator.Web.Client && npm run build'
+            }
+        }
+
+        stage('Restore NuGet Packages') {
+            steps {
+                bat '''D:\\jenkins_slave\\workspace\\OptyNew_ProjectCommon\\Optymalizator\\.nuget\\NuGet.exe restore -MSBuildVersion 17.4.1.60106 "D:\\jenkins_slave\\workspace\\OptyNew_ProjectCommon\\Optymalizator\\Optymalizator.sln" -verbosity detailed'''
+            }
+        }
+
+        stage('Install PopperJS') {
+            steps {
+                bat 'cd D:\\jenkins_slave\\workspace\\OptyNew_ProjectCommon\\Optymalizator\\Optymalizator.Web\\Scripts && npm i @popperjs/core@2.11.6'
+            }
+        }
+
+        stage('Prepare Angular Output') {
+            steps {
+                bat '''xcopy D:\\jenkins_slave\\workspace\\OptyNew_ProjectCommon\\Optymalizator\\Migracja\\Optymalizator.Web.NG\\AngularClient D:\\jenkins_slave\\workspace\\OptyNew_ProjectCommon\\OPTY\\ServerApp\\net6\\AngularClient /e /i /h'''
+            }
+        }
+
+        stage('Clean IIS Directory: OPTY_DEV_NET6') {
+            steps {
+                bat 'pushd \\\\10.158.41.77\\c$\\inetpub\\wwwroot\\OPTY_DEV_NET6 && rd /s /q . 2>nul'
+            }
+        }
+
+        stage('Clean IIS Directory: OPTY_DEV_2') {
+            steps {
+                bat 'pushd \\\\10.158.41.77\\c$\\inetpub\\wwwroot\\OPTY_DEV_2 && rd /s /q . 2>nul'
+            }
+        }
+    }
+
+    post {
+        failure {
+            echo 'Build failed.'
+        }
+        success {
+            echo 'Build succeeded.'
+        }
+    }
+}
+
+
+
+
+
+
+
 #endregion
 
 
