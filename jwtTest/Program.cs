@@ -1706,6 +1706,124 @@ pipeline
 
 
 
+//new
+
+pipeline
+{
+    agent {
+        label 'windows16_optydev_slave'
+    }
+
+    environment {
+        GIT_REPO = 'https://code.pkobp.pl/dat_optymalizator/optymalizator.git'
+        BRANCH = '*/feature/develop_NET6_Jenkins_Test'
+    }
+
+    options {
+        skipDefaultCheckout()
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                git branch: "${BRANCH}",
+                    url: "${GIT_REPO}",
+                    credentialsId: 'vault_gitlab_user_passwd'
+            }
+        }
+
+        stage('Restore Solution') {
+            steps {
+                bat 'MSBuild.exe /t:Restore D:\\jenkins_slave\\workspace\\OptyNew_ProjectCommon\\Optymalizator\\Migracja\\Optymalizator.N6.sln'
+            }
+        }
+
+        stage('npm install & build web.Client') {
+            steps {
+                bat 'cd D:\\jenkins_slave\\workspace\\OptyNew_ProjectCommon\\Optymalizator\\Migracja\\Optymalizator.Web.Client && npm install && npm run build'
+            }
+        }
+
+        stage('NuGet restore and npm install in Scripts') {
+            steps {
+                bat '''
+                D:\\jenkins_slave\\workspace\\OptyNew_ProjectCommon\\Optymalizator\\.nuget\\NuGet.exe restore -MSBuildVersion 17.4.1.60106 "D:\\jenkins_slave\\workspace\\OptyNew_ProjectCommon\\Optymalizator\\optymalizator.sln" - verbosity detailed
+                 cd D:\\jenkins_slave\\workspace\\OptyNew_ProjectCommon\\Optymalizator\\Web\\Scripts && npm i @popperjs/ core@2.11.6
+                '''
+            }
+        }
+
+        stage('Create directories') {
+            steps {
+                bat '''
+                cd D:\\jenkins_slave\\workspace\\OptyNew_ProjectCommon
+                md OPTY\\ServerApp\\net6\\AngularClient
+                md OPTY\\ServerApp\\netFramework
+                md OPTY\\ServerDB
+                '''
+            }
+        }
+
+        stage('Copy AngularClient build') {
+            steps {
+                bat '''
+                xcopy D:\\jenkins_slave\\workspace\\OptyNew_ProjectCommon\\Optymalizator\\Migracja\\Optymalizator.Web.N6\\AngularClient D:\\jenkins_slave\\workspace\\OptyNew_ProjectCommon\\OPTY\\ServerApp\\net6\\AngularClient / e / i / h
+                '''
+            }
+        }
+
+        stage('Clean remote DEV folders') {
+            steps {
+                bat '''
+                pushd \\\\10.158.41.77\\c$\\inetpub\\wwwroot\\OPTY_DEV_NET6 && rd / s / q. 2 > nul
+                pushd \\\\10.158.41.77\\c$\\inetpub\\wwwroot\\OPTY_DEV_2 && rd / s / q. 2 > nul
+                '''
+            }
+        }
+
+        stage('Copy to DEV server') {
+            steps {
+                bat '''
+                cd D:\\jenkins_slave\\workspace\\OptyNew_ProjectCommon
+                xcopy D:\\jenkins_slave\\workspace\\OptyNew_ProjectCommon\\OPTY\\ServerApp\\net6 \\\\10.158.41.77\\c$\\inetpub\\wwwroot\\OPTY_DEV_NET6 / E / I / Y
+                xcopy D:\\jenkins_slave\\workspace\\OptyNew_ProjectCommon\\OPTY\\ServerApp\\netFramework \\\\10.158.41.77\\c$\\inetpub\\wwwroot\\OPTY_DEV_2 / E / I / Y
+                '''
+            }
+        }
+
+        stage('Clean config folder') {
+            steps {
+                bat 'rmdir /S /Q "D:\\jenkins_slave\\workspace\\OptyNew_ProjectCommon\\OPTY\\ServerApp\\net6\\config"'
+            }
+        }
+
+        stage('Generate DACPAC & execute SQL script') {
+            steps {
+                bat '''
+                cd D:\\jenkins_slave\\workspace\\OptyNew_ProjectCommon\\Optymalizator\\Generate_dacpac_2016\\sqlpackage && generateReportAndScriptDacp.bat
+                D:\\jenkins_slave\\workspace\\OptyNew_ProjectCommon\\Optymalizator\\Database\\bin\\Release\\Optymalizator.Database.dacpac
+                D:\\jenkins_slave\\workspace\\OptyNew_ProjectCommon\\Optymalizator\\Generate_dacpac_2016\\sqlpackage\\Profile_TEST.xml
+                D:\\jenkins_slave\\workspace\\OptyNew_ProjectCommon\\OPTY\\ServerDB\\script.sql
+                '''
+            }
+        }
+
+        stage('Create archive') {
+            steps {
+                bat '''
+                cd D:\\jenkins_slave\\workspace\\OptyNew_ProjectCommon
+                "C:\\Program Files\\WinRAR\\WinRAR.exe" a -afzip -df \\\\10.158.41.77\\c$\\jenkins_slave\\workspace\\OptyNew_ProjectCommon\\OPTY_TEST.zip OPTY_TEST
+                '''
+            }
+        }
+    }
+}
+
+
+
+
+
+
 
 
 
