@@ -1820,6 +1820,122 @@ pipeline
 }
 
 
+                // new with nuget
+                pipeline {
+    agent {
+        label 'windows16_optydev_slave'
+    }
+
+    environment {
+        NUGET_EXE = 'nuget'
+        MSBUILD_EXE = 'MSBuild.exe'
+        SOLUTION_PATH = 'Optymalizator\\Migracja\\Optymalizator.N6.sln'
+        CLIENT_PATH = 'Optymalizator\\Migracja\\Optymalizator.Web.Client'
+        ANGULAR_BUILD_PATH = 'Optymalizator\\Migracja\\Optymalizator.Web.N6\\AngularClient'
+        SERVER_APP_PATH = 'OPTY\\ServerApp'
+        DEPLOY_NET6 = '\\\\10.158.41.77\\c$\\inetpub\\wwwroot\\OPTY_DEV_NET6'
+        DEPLOY_NETFRAMEWORK = '\\\\10.158.41.77\\c$\\inetpub\\wwwroot\\OPTY_DEV_2'
+        ZIP_PATH = '\\\\10.158.41.77\\c$\\jenkins_slave\\workspace\\OptyNew_ProjectCommon\\OPTY_TEST.zip'
+    }
+
+    stages {
+        stage('Checkout Code') {
+            steps {
+                git branch: 'feature/develop_NET6_Jenkins_Test',
+                    url: 'https://code.pkobp.pl/dat_optymalizator/optymalizator.git',
+                    credentialsId: 'vault_gitlab_user_passwd'
+            }
+        }
+
+        stage('Generate nuget.config (DevExpress)') {
+            steps {
+                withCredentials([string(credentialsId: 'devexpress_nuget_token', variable: 'DEVEXPRESS_TOKEN')]) {
+                    bat """
+                    echo ^<?xml version="1.0" encoding="utf-8"?^> > nuget.config
+                    echo ^<configuration^> >> nuget.config
+                    echo   ^<packageSources^> >> nuget.config
+                    echo     ^<add key="DevExpress" value="https://nuget.devexpress.com/%DEVEXPRESS_TOKEN%/api" /^> >> nuget.config
+                    echo     ^<add key="NuGet.org" value="https://api.nuget.org/v3/index.json" /^> >> nuget.config
+                    echo   ^</packageSources^> >> nuget.config
+                    echo ^</configuration^> >> nuget.config
+                    """
+                }
+            }
+        }
+
+        stage('Restore NuGet Packages') {
+            steps {
+                bat '%NUGET_EXE% restore %SOLUTION_PATH% -ConfigFile nuget.config'
+            }
+        }
+
+        stage('npm install & build Angular') {
+            steps {
+                bat "cd %CLIENT_PATH% && npm install && npm run build"
+            }
+        }
+
+        stage('Create Deployment Folders') {
+            steps {
+                bat """
+                md OPTY\\ServerApp\\net6\\AngularClient
+                md OPTY\\ServerApp\\netFramework
+                md OPTY\\ServerDB
+                """
+            }
+        }
+
+        stage('Copy Angular Build') {
+            steps {
+                bat "xcopy %ANGULAR_BUILD_PATH% %SERVER_APP_PATH%\\net6\\AngularClient /E /I /H"
+            }
+        }
+
+        stage('Clear Remote Folders') {
+            steps {
+                bat """
+                pushd %DEPLOY_NET6% && rd /s /q . 2>nul
+                pushd %DEPLOY_NETFRAMEWORK% && rd /s /q . 2>nul
+                """
+            }
+        }
+
+        stage('Copy to Remote DEV Server') {
+            steps {
+                bat """
+                xcopy OPTY\\ServerApp\\net6 %DEPLOY_NET6% /E /I /Y
+                xcopy OPTY\\ServerApp\\netFramework %DEPLOY_NETFRAMEWORK% /E /I /Y
+                """
+            }
+        }
+
+        stage('Remove Config Folder (optional)') {
+            steps {
+                bat 'rmdir /S /Q "OPTY\\ServerApp\\net6\\config"'
+            }
+        }
+
+        stage('Generate DACPAC & SQL Script') {
+            steps {
+                bat """
+                cd Optymalizator\\Generate_dacpac_2016\\sqlpackage
+                generateReportAndScriptDacp.bat ^
+                ..\\..\\Database\\bin\\Release\\Optymalizator.Database.dacpac ^
+                Profile_TEST.xml ^
+                ..\\..\\..\\OPTY\\ServerDB\\script.sql
+                """
+            }
+        }
+
+        stage('Create ZIP Archive') {
+            steps {
+                bat "\"C:\\Program Files\\WinRAR\\WinRAR.exe\" a -afzip -df %ZIP_PATH% OPTY_TEST"
+            }
+        }
+    }
+}
+
+
 
 
 
