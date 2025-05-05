@@ -1,0 +1,44 @@
+1. FATCA i CRS
+Nie wymagają korekty ReportingFI – jeśli instytucja nie zmienia kodu GIIN lub raport nie zawiera danych za okres obowiązywania starego adresu.
+
+Jeśli raport zawiera dane za okres ze starym adresem – wymagane zaktualizowanie danych adresowych.
+
+Kroki:
+
+Dodać kolumnę ADDRESS do tabeli DD_SOURCE_GROUP_DETAILS.
+
+Zmodyfikować dane w kolumnach START_DATE, END_DATE, ACTIVE, ACTIVE_FROM_DT, ACTIVE_TO_DT.
+
+Przenieść informacje do DD_SRC_GROUP_ID, łącznie z informacją o źródle zmian (np. PMU/PEP/GEN_DOCS).
+
+Upewnić się, że dane zaktualizowane są poprawnie w REP_GEN_DOCS.
+
+2. CIT, VAT
+Jeśli zmiana następuje w trakcie roku, należy zgłosić nowy adres do urzędów.
+
+W raportach CIT i VAT adres wpisany jest w template.
+
+W przypadku raportów wygenerowanych po zmianie, ale dotyczących wcześniejszych okresów, trzeba:
+
+wskazać adres obowiązujący w danym okresie,
+
+zgłosić zmianę poprzez odpowiednią korektę.
+
+3. PMUS
+Nie trzeba składać korekty, jeśli nie doszło do zmiany rodzaju klienta.
+
+Aktualizacja adresu tylko w przypadkach raportowania z nowym stanem instytucji.
+
+4. CBC-C i CBC-R
+Aktualizacja adresu w DD_SOURCE_GROUPS oraz DD_REP_PARAMS.
+
+W template raportów adres powinien być zaktualizowany:
+
+CBC-C – dotyczy zgłoszenia i korekty adresu.
+
+CBC-R – jeśli dotyczy korekty danych z przeszłości, należy zachować poprzedni adres.
+
+5. TP (TPR)
+Adres zmieniany tylko w zgłoszeniach od momentu obowiązywania nowego adresu.
+
+Cytat z odpowiedzi KAS: „Dotyczy to również ewentualnych korekt tych informacji”.
