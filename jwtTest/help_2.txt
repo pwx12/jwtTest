@@ -1,0 +1,19 @@
+Zmiana adresu w raportach
+
+Rodzaj raportu | Czy wymagana zmiana adresu? | Kroki działania
+-------------- | ---------------------------- | ----------------
+FATCA / CRS | Tak, jeśli raport zawiera dane ze starego adresu | - Dodać kolumnę ADDRESS do DD_SOURCE_GROUP_DETAILS
+- Zmodyfikować START_DATE, END_DATE, ACTIVE, ACTIVE_FROM_DT, ACTIVE_TO_DT
+- Upewnić się, że zmiany są poprawnie widoczne w REP_GEN_DOCS
+- Przenieść dane do DD_SRC_GROUP_ID
+CIT / VAT | Tak, w raportach po zmianie adresu; stare okresy – stary adres | - W template wpisać nowy adres
+- Dla wcześniejszych okresów używać starego adresu
+- Zgłoszenie zmiany do urzędu skarbowego
+PMUS | Nie, chyba że zmiana rodzaju klienta | - Brak potrzeby aktualizacji jeśli nie zmienia się rodzaj klienta
+- Aktualizacja tylko jeśli instytucja została przekształcona
+CBC-C / CBC-R | Tak, aktualizacja w template i parametrach raportu | - Uaktualnić DD_SOURCE_GROUPS i DD_REP_PARAMS
+- W template CBC-C i CBC-R wpisać odpowiedni adres
+- Dla korekt: zachować adres z okresu raportowanego
+TP / TPR | Tak, tylko dla zgłoszeń od momentu zmiany adresu | - Zmiana adresu dotyczy tylko zgłoszeń po zmianie
+- Nie wymaga korekty wcześniejszych zgłoszeń
+- Cytat z KAS: „Dotyczy również ewentualnych korekt tych informacji”
