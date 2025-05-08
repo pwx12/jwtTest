@@ -1,2 +1,1947 @@
-﻿// See https://aka.ms/new-console-template for more information
-Console.WriteLine("Hello, World!");
+﻿//// See https://aka.ms/new-console-template for more information
+//using Microsoft.IdentityModel.Tokens;
+//using System.IdentityModel.Tokens.Jwt;
+//using System.Security.Claims;
+//using System.Security.Cryptography;
+
+//Console.WriteLine("Hello, World!");
+
+
+
+////using System;
+////using System.IdentityModel.Tokens.Jwt;
+////using System.Security.Claims;
+////using System.Security.Cryptography;
+////using Microsoft.IdentityModel.Tokens;
+
+
+//        // Replace with your RSA private key
+//        string privateKey = "YOUR_RSA_PRIVATE_KEY";
+
+//        // Replace with your RSA public key
+//        string publicKey = "YOUR_RSA_PUBLIC_KEY";
+
+//        // Create RSA parameters from private and public keys
+//        RSAParameters rsaParamsPrivate = GetRSAParameters(privateKey);
+//        RSAParameters rsaParamsPublic = GetRSAParameters(publicKey);
+
+//        // Create RSA security keys
+//        var keyPrivate = new RsaSecurityKey(rsaParamsPrivate);
+//        var keyPublic = new RsaSecurityKey(rsaParamsPublic);
+
+//        // Create signing and verifying credentials
+//        var signingCredentials = new SigningCredentials(keyPrivate, SecurityAlgorithms.RsaSha256);
+//        var verifyingCredentials = new SigningCredentials(keyPublic, SecurityAlgorithms.RsaSha256);
+
+//        // Create claims
+//        var claims = new[]
+//        {
+//            new Claim(JwtRegisteredClaimNames.Sub, "subject"),
+//            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+//            // Add more claims as needed
+//        };
+
+//        // Create JWT
+//        var token = new JwtSecurityToken(
+//            issuer: "yourIssuer",
+//            audience: "yourAudience",
+//            claims: claims,
+//            expires: DateTime.UtcNow.AddHours(1),
+//            signingCredentials: signingCredentials
+//        );
+
+//        // Serialize JWT to a string
+//        var handler = new JwtSecurityTokenHandler();
+//        var jwt = handler.WriteToken(token);
+
+//        Console.WriteLine($"Generated JWT: {jwt}");
+
+//        // Verify JWT (optional)
+//        var validationParameters = new TokenValidationParameters
+//        {
+//            ValidateIssuer = true,
+//            ValidIssuer = "yourIssuer",
+//            ValidateAudience = true,
+//            ValidAudience = "yourAudience",
+//            IssuerSigningKey = keyPublic,
+//            ValidateLifetime = true,
+//            ClockSkew = TimeSpan.Zero
+//        };
+
+//        SecurityToken validatedToken;
+//        var principal = handler.ValidateToken(jwt, validationParameters, out validatedToken);
+
+//        Console.WriteLine($"JWT Validation Successful. Subject: {principal.Identity.Name}");
+
+
+//    static RSAParameters GetRSAParameters(string key)
+//    {
+//        var rsa = new RSACryptoServiceProvider();
+//        rsa.FromXmlString(key);
+
+//        return rsa.ExportParameters(true);
+//    }
+
+//---------------------------------------------------
+
+//using System;
+//using System.IdentityModel.Tokens.Jwt;
+//using System.Security.Claims;
+//using System.Security.Cryptography;
+//using Microsoft.IdentityModel.Tokens;
+
+
+//        // Replace with your RSA private key
+//        string privateKey = "YOUR_RSA_PRIVATE_KEY";
+
+//        // Replace with your RSA public key
+//        string publicKey = "YOUR_RSA_PUBLIC_KEY";
+
+//        // Create RSA parameters from private and public keys
+//        RSAParameters rsaParamsPrivate = GetRSAParameters(privateKey);
+//        RSAParameters rsaParamsPublic = GetRSAParameters(publicKey);
+
+//        // Create RSA security keys
+//        var keyPrivate = new RsaSecurityKey(rsaParamsPrivate);
+//        var keyPublic = new RsaSecurityKey(rsaParamsPublic);
+
+//        // Create signing and verifying credentials
+//        var signingCredentials = new SigningCredentials(keyPrivate, SecurityAlgorithms.RsaSha256);
+//        var verifyingCredentials = new SigningCredentials(keyPublic, SecurityAlgorithms.RsaSha256);
+
+//        // Create claims
+//        var claims = new[]
+//        {
+//            new Claim(JwtRegisteredClaimNames.Sub, "subject"),
+//            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+//            // Add more claims as needed
+//        };
+
+//        // Create JWT
+//        var token = new JwtSecurityToken(
+//            issuer: "yourIssuer",
+//            audience: "yourAudience",
+//            claims: claims,
+//            expires: DateTime.UtcNow.AddHours(1),
+//            signingCredentials: signingCredentials
+//        );
+
+//        // Serialize JWT to a string
+//        var handler = new JwtSecurityTokenHandler();
+//        var jwt = handler.WriteToken(token);
+
+//        Console.WriteLine($"Generated JWT: {jwt}");
+
+//        // Verify JWT (optional)
+//        var validationParameters = new TokenValidationParameters
+//        {
+//            ValidateIssuer = true,
+//            ValidIssuer = "yourIssuer",
+//            ValidateAudience = true,
+//            ValidAudience = "yourAudience",
+//            IssuerSigningKey = keyPublic,
+//            ValidateLifetime = true,
+//            ClockSkew = TimeSpan.Zero
+//        };
+
+//        SecurityToken validatedToken;
+//        var principal = handler.ValidateToken(jwt, validationParameters, out validatedToken);
+
+//        Console.WriteLine($"JWT Validation Successful. Subject: {principal.Identity.Name}");
+
+
+//    static RSAParameters GetRSAParameters(string key)
+//    {
+//        var rsa = new RSACryptoServiceProvider();
+//        rsa.FromXmlString(key);
+
+//        return rsa.ExportParameters(true);
+//}
+
+
+//using System;
+//using System.IO;
+//using System.Security.Cryptography;
+////using System.Security.Cryptography.X509Certificates;
+//using System.Text;
+//using System.IdentityModel.Tokens.Jwt;
+////using BouncyCastle.Crypto;
+////using BouncyCastle.Crypto.Parameters;
+////using BouncyCastle.Security;
+//using Microsoft.IdentityModel.Tokens;
+
+//class RS256TokenGenerator
+//{
+//    static void Main()
+//    {
+//        // Replace with the paths to your PEM files
+//        string privateKeyPath = @"C:\Users\misie\OneDrive\Desktop\key\prv8.pem";
+//        string publicKeyPath = @"C:\Users\misie\OneDrive\Desktop\key\pub8.pem";
+
+//        // Load private key from PEM file
+//        RSA privateKey = LoadPrivateKey(privateKeyPath);
+
+//        // Load public key from PEM file
+//        RSA publicKey = LoadPublicKey(publicKeyPath);
+
+//        // Create JWT token
+//        string jwt = GenerateJwt(privateKey, publicKey);
+
+//        Console.WriteLine("Generated JWT: " + jwt);
+//    }
+
+//    static RSA LoadPrivateKey(string privateKeyPath)
+//    {
+//        using (StreamReader reader = new StreamReader(privateKeyPath))
+//        {
+//            string privateKeyPem = reader.ReadToEnd();
+//            var privateKeyBytes = Convert.FromBase64String(
+//                privateKeyPem
+//                    .Replace("-----BEGIN RSA PRIVATE KEY-----", "")
+//                    .Replace("-----END RSA PRIVATE KEY-----", "")
+//                    .Replace("\n", "")
+//            );
+
+//            var rsa = RSA.Create();
+//            rsa.ImportRSAPrivateKey(privateKeyBytes, out _);
+//            return rsa;
+//        }
+//    }
+
+//    static RSA LoadPublicKey(string publicKeyPath)
+//    {
+//        using (StreamReader reader = new StreamReader(publicKeyPath))
+//        {
+//            string publicKeyPem = reader.ReadToEnd();
+//            var publicKeyBytes = Convert.FromBase64String(
+//                publicKeyPem
+//                    .Replace("-----BEGIN PUBLIC KEY-----", "")
+//                    .Replace("-----END PUBLIC KEY-----", "")
+//                    .Replace("\n", "")
+//            );
+
+//            var rsa = RSA.Create();
+//            rsa.ImportSubjectPublicKeyInfo(publicKeyBytes, out _);
+//            return rsa;
+//        }
+//    }
+
+//    static string GenerateJwt(RSA privateKey, RSA publicKey)
+//    {
+//        var securityKey = new RsaSecurityKey(privateKey);
+//        var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.RsaSha256);
+
+//        var tokenHandler = new JwtSecurityTokenHandler();
+//        var jwtToken = tokenHandler.CreateJwtSecurityToken(
+//            issuer: "your-issuer",
+//            audience: "your-audience",
+//            subject: new System.Security.Claims.ClaimsIdentity(new[] { new System.Security.Claims.Claim("sub", "subject") }),
+//            expires: DateTime.UtcNow.AddHours(1),
+//            signingCredentials: credentials
+//        );
+
+//        return tokenHandler.WriteToken(jwtToken);
+//    }
+//}
+
+
+
+
+
+
+//-------------------------------- Read pem file
+//using System;
+//using System.IO;
+//using Org.BouncyCastle.Crypto;
+//using Org.BouncyCastle.OpenSsl;
+
+//class Program
+//{
+//    static void Main()
+//    {
+//        string privateKeyPath = "path/to/private_key.pem";
+
+//        try
+//        {
+//            AsymmetricCipherKeyPair keyPair = ReadPrivateKey(privateKeyPath);
+
+//            // Now you have the private key in the keyPair variable
+//            // You can use it for cryptographic operations as needed
+//            Console.WriteLine("Private key read successfully.");
+//        }
+//        catch (Exception ex)
+//        {
+//            Console.WriteLine($"Error reading private key: {ex.Message}");
+//        }
+//    }
+
+//    static AsymmetricCipherKeyPair ReadPrivateKey(string privateKeyPath)
+//    {
+//        using (StreamReader reader = new StreamReader(privateKeyPath))
+//        {
+//            PemReader pemReader = new PemReader(reader);
+//            object obj = pemReader.ReadObject();
+
+//            if (obj is AsymmetricCipherKeyPair)
+//            {
+//                return (AsymmetricCipherKeyPair)obj;
+//            }
+//            else
+//            {
+//                throw new InvalidOperationException("The PEM file does not contain a private key.");
+//            }
+//        }
+//    }
+//}
+
+
+//--------------------
+
+//using System;
+//using System.IO;
+//using System.Security.Cryptography;
+//using System.Text;
+//using System.IdentityModel.Tokens.Jwt;
+//using Microsoft.IdentityModel.Tokens;
+
+//class Program
+//{
+//    static void Main()
+//    {
+//        // Replace these paths with the paths to your PEM files
+//        string privateKeyPath = "path/to/private-key.pem";
+//        string publicKeyPath = "path/to/public-key.pem";
+
+//        try
+//        {
+//            string privateKeyPEM = ReadKeyFromFile(privateKeyPath);
+//            string publicKeyPEM = ReadKeyFromFile(publicKeyPath);
+
+//            RSACryptoServiceProvider rsaPrivate = LoadRSAPrivateKey(privateKeyPEM);
+//            RSACryptoServiceProvider rsaPublic = LoadRSAPublicKey(publicKeyPEM);
+
+//            // Create a JWT token
+//            string jwtToken = GenerateJwt(rsaPrivate, rsaPublic);
+
+//            Console.WriteLine($"Generated JWT token:\n{jwtToken}");
+//        }
+//        catch (Exception ex)
+//        {
+//            Console.WriteLine($"An error occurred: {ex.Message}");
+//        }
+//    }
+
+//    static RSACryptoServiceProvider LoadRSAPrivateKey(string privateKeyPEM)
+//    {
+//        byte[] privateKeyBytes = Convert.FromBase64String(privateKeyPEM);
+
+//        using (RSACryptoServiceProvider rsa = new RSACryptoServiceProvider())
+//        {
+//            RSAParameters rsaParams = new RSAParameters();
+
+//            using (BinaryReader reader = new BinaryReader(new MemoryStream(privateKeyBytes)))
+//            {
+//                // Implementation of loading RSA private key similar to the previous example
+//                // ...
+
+//                // Use the LoadRSAPSSPrivateKey method from the previous example
+//                return LoadRSAPSSPrivateKey(privateKeyPEM);
+//            }
+//        }
+//    }
+
+//    static RSACryptoServiceProvider LoadRSAPublicKey(string publicKeyPEM)
+//    {
+//        byte[] publicKeyBytes = Convert.FromBase64String(publicKeyPEM);
+
+//        using (RSACryptoServiceProvider rsa = new RSACryptoServiceProvider())
+//        {
+//            RSAParameters rsaParams = new RSAParameters();
+
+//            using (BinaryReader reader = new BinaryReader(new MemoryStream(publicKeyBytes)))
+//            {
+//                // Implementation of loading RSA public key similar to the previous example
+//                // ...
+
+//                // Use the LoadRSAPublicKey method from the previous example
+//                return LoadRSAPublicKey(publicKeyPEM);
+//            }
+//        }
+//    }
+
+//    static string GenerateJwt(RSACryptoServiceProvider rsaPrivate, RSACryptoServiceProvider rsaPublic)
+//    {
+//        var securityKey = new RsaSecurityKey(rsaPrivate);
+
+//        var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.RsaSha256);
+
+//        var header = new JwtHeader(credentials);
+//        var payload = new JwtPayload
+//        {
+//            { "sub", "subject" },
+//            { "exp", DateTime.UtcNow.AddHours(1) }
+//            // Add additional claims as needed
+//        };
+
+//        var jwtToken = new JwtSecurityToken(header, payload);
+//        var jwtHandler = new JwtSecurityTokenHandler();
+
+//        return jwtHandler.WriteToken(jwtToken);
+//    }
+
+//    // Other helper methods similar to the previous example
+//    // ...
+//}
+
+
+//using System;
+//using System.IO;
+//using System.Security.Cryptography;
+//using System.Text;
+
+//class Program
+//{
+//    static void Main()
+//    {
+//        // Replace this path with the path to your PEM file containing the RSASSA-PSS private key
+//        string privateKeyPath = "path/to/private-key.pem";
+
+//        try
+//        {
+//            string privateKeyPEM = ReadKeyFromFile(privateKeyPath);
+
+//            RSA rsa = LoadRSASSAPSSPrivateKey(privateKeyPEM);
+
+//            // Now you can use the 'rsa' object for cryptographic operations
+
+//            Console.WriteLine("RSASSA-PSS private key loaded successfully.");
+//        }
+//        catch (Exception ex)
+//        {
+//            Console.WriteLine($"An error occurred: {ex.Message}");
+//        }
+//    }
+
+//    static RSA LoadRSASSAPSSPrivateKey(string privateKeyPEM)
+//    {
+//        byte[] privateKeyBytes = Convert.FromBase64String(privateKeyPEM);
+
+//        using (RSA rsa = RSA.Create())
+//        {
+//            RSAParameters rsaParams = new RSAParameters();
+
+//            // Assuming the private key is in PKCS#8 format
+//            if (PrivateKeyParser.TryReadPkcs8(privateKeyBytes, out var keyInfo))
+//            {
+//                rsaParams.Modulus = keyInfo.Modulus;
+//                rsaParams.Exponent = keyInfo.Exponent;
+//                rsaParams.D = keyInfo.D;
+//                rsaParams.P = keyInfo.P;
+//                rsaParams.Q = keyInfo.Q;
+//                rsaParams.DP = keyInfo.DP;
+//                rsaParams.DQ = keyInfo.DQ;
+//                rsaParams.InverseQ = keyInfo.InverseQ;
+
+//                rsa.ImportParameters(rsaParams);
+
+//                return rsa;
+//            }
+
+//            throw new InvalidOperationException("Failed to read RSASSA-PSS private key.");
+//        }
+//    }
+
+//    static string ReadKeyFromFile(string filePath)
+//    {
+//        using (StreamReader reader = new StreamReader(filePath))
+//        {
+//            StringBuilder keyBuilder = new StringBuilder();
+//            string line;
+
+//            // Skip the first line if it contains "-----BEGIN..."
+//            if ((line = reader.ReadLine()?.Trim())?.StartsWith("-----BEGIN") == true)
+//            {
+//                while ((line = reader.ReadLine()?.Trim()) != null && !line.StartsWith("-----END"))
+//                {
+//                    keyBuilder.AppendLine(line);
+//                }
+//            }
+
+//            return keyBuilder.ToString();
+//        }
+//    }
+//}
+
+//public static class PrivateKeyParser
+//{
+//    public static bool TryReadPkcs8(byte[] keyBytes, out RSAParameters keyInfo)
+//    {
+//        // Implementation to parse PKCS#8 private key
+//        // ...
+
+//        keyInfo = default;
+//        return false;
+//    }
+//}
+
+
+
+
+////------------------------httpClient example--------
+//using System;
+//using System.Collections.Generic;
+//using System.Net.Http;
+//using System.Threading.Tasks;
+
+//class Program
+//{
+//    static async Task Main()
+//    {
+//        // Replace the URL with the actual endpoint you want to post data to
+//        string apiUrl = "https://example.com/api";
+
+//        // Prepare the data you want to send as key-value pairs
+//        var formData = new Dictionary<string, string>
+//        {
+//            { "key1", "value1" },
+//            { "key2", "value2" }
+//        };
+
+//        // Create an instance of HttpClient
+//        using (HttpClient httpClient = new HttpClient())
+//        {
+//            // Create FormUrlEncodedContent from the data
+//            var content = new FormUrlEncodedContent(formData);
+
+//            try
+//            {
+//                // Send the POST request
+//                HttpResponseMessage response = await httpClient.PostAsync(apiUrl, content);
+
+//                // Check if the request was successful
+//                if (response.IsSuccessStatusCode)
+//                {
+//                    // Read and handle the response content
+//                    string responseContent = await response.Content.ReadAsStringAsync();
+//                    Console.WriteLine("Response: " + responseContent);
+//                }
+//                else
+//                {
+//                    Console.WriteLine("Error: " + response.StatusCode);
+//                }
+//            }
+//            catch (Exception ex)
+//            {
+//                Console.WriteLine("Exception: " + ex.Message);
+//            }
+//        }
+//    }
+//}
+
+
+
+
+using System;
+using System.IO;
+using System.Linq;
+using System.Text;
+using System.Xml.Linq;
+using System.Text.RegularExpressions;
+
+namespace optyCrud_v2
+{
+    class Program
+    {
+        static void Main()
+        {
+            Console.Write("Podaj ścieżkę do pliku XML: ");
+            string xmlPath = Console.ReadLine()?.Trim();
+
+            if (string.IsNullOrWhiteSpace(xmlPath) || !File.Exists(xmlPath))
+            {
+                Console.WriteLine("Nieprawidłowa ścieżka do pliku XML.");
+                return;
+            }
+
+            Console.Write("Podaj nazwę encji (np. Employee): ");
+            string className = Console.ReadLine()?.Trim();
+            if (string.IsNullOrWhiteSpace(className))
+            {
+                Console.WriteLine("Nazwa klasy nie może być pusta.");
+                return;
+            }
+
+            Console.Write("Czy wygenerować kod SQL? (tak/nie): ");
+            bool generateSql = Console.ReadLine()?.Trim().ToLower() == "tak";
+
+            // Struktura katalogów
+            string baseDir = "GeneratedProject";
+            string controllersDir = Path.Combine(baseDir, "Controllers");
+            string servicesDir = Path.Combine(baseDir, "Services");
+            string repositoriesDir = Path.Combine(baseDir, "Repositories");
+            string modelsDir = Path.Combine(baseDir, "Models");
+            string dataDir = Path.Combine(baseDir, "Data");
+
+            Directory.CreateDirectory(baseDir);
+            Directory.CreateDirectory(controllersDir);
+            Directory.CreateDirectory(servicesDir);
+            Directory.CreateDirectory(repositoriesDir);
+            Directory.CreateDirectory(modelsDir);
+            Directory.CreateDirectory(dataDir);
+
+            // Ścieżki do plików
+            string modelPath = Path.Combine(modelsDir, $"{className}.cs");
+            string entityPath = Path.Combine(modelsDir, $"{className}Entity.cs");
+            string repositoryInterfacePath = Path.Combine(repositoriesDir, $"I{className}Repository.cs");
+            string repositoryPath = Path.Combine(repositoriesDir, $"{className}Repository.cs");
+            string serviceInterfacePath = Path.Combine(servicesDir, $"I{className}Service.cs");
+            string servicePath = Path.Combine(servicesDir, $"{className}Service.cs");
+            string controllerPath = Path.Combine(controllersDir, $"{className}Controller.cs");
+            string dbContextPath = Path.Combine(dataDir, "ApplicationDbContext.cs");
+            string sqlPath = Path.Combine(baseDir, $"{className}.sql");
+
+            try
+            {
+                XDocument xmlDoc = XDocument.Load(xmlPath);
+                var rootElement = xmlDoc.Root;
+                if (rootElement == null || !rootElement.Elements().Any())
+                {
+                    Console.WriteLine("Brak danych w XML.");
+                    return;
+                }
+
+                var firstElement = rootElement.Elements().First();
+
+                // Tworzenie Modelu
+                StringBuilder modelBuilder = new StringBuilder();
+                modelBuilder.AppendLine("using System;");
+                modelBuilder.AppendLine($"public class {className}");
+                modelBuilder.AppendLine("{");
+
+                StringBuilder entityBuilder = new StringBuilder();
+                entityBuilder.AppendLine("using System;");
+                entityBuilder.AppendLine($"public class {className}Entity");
+                entityBuilder.AppendLine("{");
+
+                StringBuilder sqlBuilder = new StringBuilder();
+                if (generateSql)
+                {
+                    sqlBuilder.AppendLine($"CREATE TABLE {className} (");
+                    sqlBuilder.AppendLine("    ID INT IDENTITY(1,1) PRIMARY KEY,");
+                }
+
+                foreach (var element in firstElement.Elements())
+                {
+                    string propertyName = element.Name.LocalName;
+                    string screamingSnakeCaseName = ToScreamingSnakeCase(propertyName);
+                    string xmlType = element.Attribute("type")?.Value ?? "string";
+                    string csharpType = ConvertToCSharpType(xmlType);
+                    string sqlType = ConvertToSqlType(xmlType, element);
+
+                    modelBuilder.AppendLine($"    public {csharpType} {propertyName} {{ get; set; }}");
+                    entityBuilder.AppendLine($"    public {csharpType} {screamingSnakeCaseName} {{ get; set; }}");
+
+                    if (generateSql)
+                        sqlBuilder.AppendLine($"    {screamingSnakeCaseName} {sqlType} NOT NULL,");
+                }
+
+                modelBuilder.AppendLine("}");
+                entityBuilder.AppendLine("}");
+                if (generateSql)
+                {
+                    sqlBuilder.Length -= 3;
+                    sqlBuilder.AppendLine("\n);");
+                }
+
+                File.WriteAllText(modelPath, modelBuilder.ToString());
+                File.WriteAllText(entityPath, entityBuilder.ToString());
+                if (generateSql) File.WriteAllText(sqlPath, sqlBuilder.ToString());
+
+                // Tworzenie plików dla warstw aplikacji
+                File.WriteAllText(repositoryInterfacePath, $"public interface I{className}Repository {{ }}");
+                File.WriteAllText(repositoryPath, $"public class {className}Repository : I{className}Repository {{ }}");
+
+                File.WriteAllText(serviceInterfacePath, $"public interface I{className}Service {{ }}");
+                File.WriteAllText(servicePath, $"public class {className}Service : I{className}Service {{ }}");
+
+                File.WriteAllText(controllerPath, $@"
+                    using Microsoft.AspNetCore.Mvc;
+
+                    [Route(""api/[controller]"")]
+                    [ApiController]
+                    public class {className}Controller : ControllerBase
+                    {{
+                        private readonly I{className}Service _service;
+
+                        public {className}Controller(I{className}Service service)
+                        {{
+                            _service = service;
+                        }}
+                    }}
+                    ");
+
+                File.WriteAllText(dbContextPath, $@"
+                    using Microsoft.EntityFrameworkCore;
+
+                    public class ApplicationDbContext : DbContext
+                    {{
+                        public DbSet<{className}Entity> {className}s {{ get; set; }}
+
+                        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options) {{ }}
+                    }}
+                    ");
+
+                Console.WriteLine($"Struktura katalogów dla projektu CRUD została wygenerowana w {baseDir}.");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Błąd podczas przetwarzania: " + ex.Message);
+            }
+        }
+
+        static string ConvertToCSharpType(string xmlType)
+        {
+            switch (xmlType.ToLower())
+            {
+                case "int":
+                    return "int";
+                case "decimal":
+                    return "decimal";
+                case "datetime":
+                    return "DateTime";
+                case "bool":
+                    return "bool";
+                default:
+                    return "string";
+
+            };
+        }
+
+        static string ConvertToSqlType(string xmlType, XElement element)
+        {
+            string length = element.Attribute("length")?.Value;
+            string precision = element.Attribute("precision")?.Value;
+
+            switch (xmlType.ToLower())
+            {
+                case "int": return "INT";
+                case "decimal": return precision != null ? $"DECIMAL({precision})" : "DECIMAL(18,2)";
+                case "float": return "FLOAT";
+                case "double": return "DOUBLE PRECISION";
+                case "datetime": return "DATETIME";
+                case "bool": return "BIT";
+                case "char": return length != null ? $"CHAR({length})" : "CHAR(1)";
+                case "string": return length != null ? $"NVARCHAR({length})" : "NVARCHAR(255)";
+                default:
+                    throw new Exception("Błąd");
+            };
+        }
+
+        static string ToScreamingSnakeCase(string input)
+        {
+            return Regex.Replace(input, "([a-z])([A-Z])", "$1_$2").ToUpper();
+        }
+    }
+}
+
+
+
+//using System;
+//using System.IO;
+//using System.Linq;
+//using System.Text;
+//using System.Xml.Linq;
+//using System.Collections.Generic;
+//using System.Text.RegularExpressions;
+
+
+//namespace optyCrud_v2
+//{
+//    class Program
+//    {
+//        static void Main()
+//        {
+//            Console.Write("Podaj ścieżkę do pliku XML: ");
+//            string xmlPath = Console.ReadLine()?.Trim();
+
+//            if (string.IsNullOrWhiteSpace(xmlPath) || !File.Exists(xmlPath))
+//            {
+//                Console.WriteLine("Nieprawidłowa ścieżka do pliku XML.");
+//                return;
+//            }
+
+//            Console.Write("Podaj nazwę encji (np. Employee): ");
+//            string className = Console.ReadLine()?.Trim();
+//            if (string.IsNullOrWhiteSpace(className))
+//            {
+//                Console.WriteLine("Nazwa klasy nie może być pusta.");
+//                return;
+//            }
+
+//            Console.Write("Czy wygenerować kod SQL? (tak/nie): ");
+//            bool generateSql = Console.ReadLine()?.Trim().ToLower() == "tak";
+
+//            // Struktura katalogów
+//            string baseDir = "GeneratedProject";
+//            string controllersDir = Path.Combine(baseDir, "Controllers");
+//            string servicesDir = Path.Combine(baseDir, "Services");
+//            string repositoriesDir = Path.Combine(baseDir, "Repositories");
+//            string modelsDir = Path.Combine(baseDir, "Models");
+//            string dataDir = Path.Combine(baseDir, "Data");
+//            string testsDir = Path.Combine(baseDir, "Tests");
+
+//            Directory.CreateDirectory(baseDir);
+//            Directory.CreateDirectory(controllersDir);
+//            Directory.CreateDirectory(servicesDir);
+//            Directory.CreateDirectory(repositoriesDir);
+//            Directory.CreateDirectory(modelsDir);
+//            Directory.CreateDirectory(dataDir);
+//            Directory.CreateDirectory(testsDir);
+
+//            // Ścieżki do plików
+//            string sqlPath = Path.Combine(baseDir, $"{className}.sql");
+//            string appSettingsPath = Path.Combine(baseDir, "appsettings.json");
+//            string swaggerPath = Path.Combine(baseDir, "swagger.yaml");
+//            string programPath = Path.Combine(baseDir, "Program.cs");
+
+//            try
+//            {
+//                // Generowanie `appsettings.json`
+//                File.WriteAllText(appSettingsPath, $@"
+//                {{
+//                  ""ConnectionStrings"": {{
+//                    ""DefaultConnection"": ""Server=localhost;Database={className}Db;Trusted_Connection=True;""
+//                  }}
+//                }}
+//                ");
+
+//                                // Generowanie Program.cs (Swagger)
+//                                File.WriteAllText(programPath, $@"
+//                                    using Microsoft.AspNetCore.Builder;
+//                                    using Microsoft.Extensions.DependencyInjection;
+//                                    using Microsoft.Extensions.Hosting;
+
+//                                    var builder = WebApplication.CreateBuilder(args);
+
+//                                    builder.Services.AddControllers();
+//                                    builder.Services.AddEndpointsApiExplorer();
+//                                    builder.Services.AddSwaggerGen();
+
+//                                    var app = builder.Build();
+
+//                                    if (app.Environment.IsDevelopment())
+//                                    {{
+//                                        app.UseSwagger();
+//                                        app.UseSwaggerUI();
+//                                    }}
+
+//                                    app.UseAuthorization();
+//                                    app.MapControllers();
+//                                    app.Run();
+//                                    ");
+
+//                // Generowanie swagger.yaml
+//                File.WriteAllText(swaggerPath, $"openapi: 3.0.0\ninfo:\n  title: {className} API\n  version: 1.0.0");
+
+//                Console.WriteLine($"Projekt CRUD został wygenerowany w katalogu {baseDir}.");
+//            }
+//            catch (Exception ex)
+//            {
+//                Console.WriteLine("Błąd podczas przetwarzania: " + ex.Message);
+//            }
+//        }
+//    }
+//}
+
+
+
+using System;
+using System.IO;
+using System.Linq;
+using System.Text;
+using System.Xml.Linq;
+using System.Text.RegularExpressions;
+
+namespace optyCrud_v2
+{
+    class Program
+    {
+        static void Main()
+        {
+            Console.Write("Podaj ścieżkę do pliku XML: ");
+            string xmlPath = Console.ReadLine()?.Trim();
+
+            if (string.IsNullOrWhiteSpace(xmlPath) || !File.Exists(xmlPath))
+            {
+                Console.WriteLine("Nieprawidłowa ścieżka do pliku XML.");
+                return;
+            }
+
+            Console.Write("Podaj nazwę encji (np. Employee): ");
+            string className = Console.ReadLine()?.Trim();
+            if (string.IsNullOrWhiteSpace(className))
+            {
+                Console.WriteLine("Nazwa klasy nie może być pusta.");
+                return;
+            }
+
+            Console.Write("Czy wygenerować kod SQL? (tak/nie): ");
+            bool generateSql = Console.ReadLine()?.Trim().ToLower() == "tak";
+
+            // Struktura katalogów
+            string baseDir = "GeneratedProject";
+            string controllersDir = Path.Combine(baseDir, "Controllers");
+            string servicesDir = Path.Combine(baseDir, "Services");
+            string repositoriesDir = Path.Combine(baseDir, "Repositories");
+            string modelsDir = Path.Combine(baseDir, "Models");
+            string dataDir = Path.Combine(baseDir, "Data");
+
+            Directory.CreateDirectory(baseDir);
+            Directory.CreateDirectory(controllersDir);
+            Directory.CreateDirectory(servicesDir);
+            Directory.CreateDirectory(repositoriesDir);
+            Directory.CreateDirectory(modelsDir);
+            Directory.CreateDirectory(dataDir);
+
+            // Ścieżki do plików
+            string modelPath = Path.Combine(modelsDir, $"{className}.cs");
+            string entityPath = Path.Combine(modelsDir, $"{className}Entity.cs");
+            string repositoryInterfacePath = Path.Combine(repositoriesDir, $"I{className}Repository.cs");
+            string repositoryPath = Path.Combine(repositoriesDir, $"{className}Repository.cs");
+            string serviceInterfacePath = Path.Combine(servicesDir, $"I{className}Service.cs");
+            string servicePath = Path.Combine(servicesDir, $"{className}Service.cs");
+            string controllerPath = Path.Combine(controllersDir, $"{className}Controller.cs");
+            string dbContextPath = Path.Combine(dataDir, "ApplicationDbContext.cs");
+            string sqlPath = Path.Combine(baseDir, $"{className}.sql");
+
+            try
+            {
+                XDocument xmlDoc = XDocument.Load(xmlPath);
+                var rootElement = xmlDoc.Root;
+                if (rootElement == null || !rootElement.Elements().Any())
+                {
+                    Console.WriteLine("Brak danych w XML.");
+                    return;
+                }
+
+                var firstElement = rootElement.Elements().First();
+
+                // Tworzenie Modelu
+                StringBuilder modelBuilder = new StringBuilder();
+                modelBuilder.AppendLine("using System;");
+                modelBuilder.AppendLine($"public class {className}");
+                modelBuilder.AppendLine("{");
+
+                StringBuilder entityBuilder = new StringBuilder();
+                entityBuilder.AppendLine("using System;");
+                entityBuilder.AppendLine($"public class {className}Entity");
+                entityBuilder.AppendLine("{");
+
+                StringBuilder sqlBuilder = new StringBuilder();
+                if (generateSql)
+                {
+                    sqlBuilder.AppendLine($"CREATE TABLE {className} (");
+                    sqlBuilder.AppendLine("    ID INT IDENTITY(1,1) PRIMARY KEY,");
+                }
+
+                foreach (var element in firstElement.Elements())
+                {
+                    string propertyName = element.Name.LocalName;
+                    string screamingSnakeCaseName = ToScreamingSnakeCase(propertyName);
+                    string xmlType = element.Attribute("type")?.Value ?? "string";
+                    string csharpType = ConvertToCSharpType(xmlType);
+                    string sqlType = ConvertToSqlType(xmlType, element);
+
+                    modelBuilder.AppendLine($"    public {csharpType} {propertyName} {{ get; set; }}");
+                    entityBuilder.AppendLine($"    public {csharpType} {screamingSnakeCaseName} {{ get; set; }}");
+
+                    if (generateSql)
+                        sqlBuilder.AppendLine($"    {screamingSnakeCaseName} {sqlType} NOT NULL,");
+                }
+
+                modelBuilder.AppendLine("}");
+                entityBuilder.AppendLine("}");
+                if (generateSql)
+                {
+                    sqlBuilder.Length -= 3;
+                    sqlBuilder.AppendLine("\n);");
+                }
+
+                File.WriteAllText(modelPath, modelBuilder.ToString());
+                File.WriteAllText(entityPath, entityBuilder.ToString());
+                if (generateSql) File.WriteAllText(sqlPath, sqlBuilder.ToString());
+
+                // Tworzenie plików dla warstw aplikacji
+                File.WriteAllText(repositoryInterfacePath, $"public interface I{className}Repository {{ }}");
+                File.WriteAllText(repositoryPath, $"public class {className}Repository : I{className}Repository {{ }}");
+
+                File.WriteAllText(serviceInterfacePath, $"public interface I{className}Service {{ }}");
+                File.WriteAllText(servicePath, $"public class {className}Service : I{className}Service {{ }}");
+
+                File.WriteAllText(controllerPath, $@"
+                    using Microsoft.AspNetCore.Mvc;
+
+                    [Route(""api/[controller]"")]
+                    [ApiController]
+                    public class {className}Controller : ControllerBase
+                    {{
+                        private readonly I{className}Service _service;
+
+                        public {className}Controller(I{className}Service service)
+                        {{
+                            _service = service;
+                        }}
+                    }}
+                    ");
+
+                File.WriteAllText(dbContextPath, $@"
+                    using Microsoft.EntityFrameworkCore;
+
+                    public class ApplicationDbContext : DbContext
+                    {{
+                        public DbSet<{className}Entity> {className}s {{ get; set; }}
+
+                        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options) {{ }}
+                    }}
+                    ");
+
+                Console.WriteLine($"Struktura katalogów dla projektu CRUD została wygenerowana w {baseDir}.");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Błąd podczas przetwarzania: " + ex.Message);
+            }
+        }
+
+        static string ConvertToCSharpType(string xmlType)
+        {
+            switch (xmlType.ToLower())
+            {
+                case "int":
+                    return "int";
+                case "decimal":
+                    return "decimal";
+                case "datetime":
+                    return "DateTime";
+                case "bool":
+                    return "bool";
+                default:
+                    return "string";
+
+            };
+        }
+
+        static string ConvertToSqlType(string xmlType, XElement element)
+        {
+            string length = element.Attribute("length")?.Value;
+            string precision = element.Attribute("precision")?.Value;
+
+            switch (xmlType.ToLower())
+            {
+                case "int": return "INT";
+                case "decimal": return precision != null ? $"DECIMAL({precision})" : "DECIMAL(18,2)";
+                case "float": return "FLOAT";
+                case "double": return "DOUBLE PRECISION";
+                case "datetime": return "DATETIME";
+                case "bool": return "BIT";
+                case "char": return length != null ? $"CHAR({length})" : "CHAR(1)";
+                case "string": return length != null ? $"NVARCHAR({length})" : "NVARCHAR(255)";
+                default:
+                    throw new Exception("Błąd");
+            };
+        }
+
+        static string ToScreamingSnakeCase(string input)
+        {
+            return Regex.Replace(input, "([a-z])([A-Z])", "$1_$2").ToUpper();
+        }
+    }
+}
+
+
+
+
+
+//using System;
+//using System.IO;
+//using System.Linq;
+//using System.Text;
+//using System.Xml.Linq;
+//using System.Collections.Generic;
+//using System.Text.RegularExpressions;
+
+
+//namespace optyCrud_v2
+//{
+//    class Program
+//    {
+//        static void Main()
+//        {
+//            Console.Write("Podaj ścieżkę do pliku XML: ");
+//            string xmlPath = Console.ReadLine()?.Trim();
+
+//            if (string.IsNullOrWhiteSpace(xmlPath) || !File.Exists(xmlPath))
+//            {
+//                Console.WriteLine("Nieprawidłowa ścieżka do pliku XML.");
+//                return;
+//            }
+
+//            Console.Write("Podaj nazwę encji (np. Employee): ");
+//            string className = Console.ReadLine()?.Trim();
+//            if (string.IsNullOrWhiteSpace(className))
+//            {
+//                Console.WriteLine("Nazwa klasy nie może być pusta.");
+//                return;
+//            }
+
+//            Console.Write("Czy wygenerować kod SQL? (tak/nie): ");
+//            bool generateSql = Console.ReadLine()?.Trim().ToLower() == "tak";
+
+//            // Struktura katalogów
+//            string baseDir = "GeneratedProject";
+//            string controllersDir = Path.Combine(baseDir, "Controllers");
+//            string servicesDir = Path.Combine(baseDir, "Services");
+//            string repositoriesDir = Path.Combine(baseDir, "Repositories");
+//            string modelsDir = Path.Combine(baseDir, "Models");
+//            string dataDir = Path.Combine(baseDir, "Data");
+//            string testsDir = Path.Combine(baseDir, "Tests");
+
+//            Directory.CreateDirectory(baseDir);
+//            Directory.CreateDirectory(controllersDir);
+//            Directory.CreateDirectory(servicesDir);
+//            Directory.CreateDirectory(repositoriesDir);
+//            Directory.CreateDirectory(modelsDir);
+//            Directory.CreateDirectory(dataDir);
+//            Directory.CreateDirectory(testsDir);
+
+//            // Ścieżki do plików
+//            string sqlPath = Path.Combine(baseDir, $"{className}.sql");
+//            string appSettingsPath = Path.Combine(baseDir, "appsettings.json");
+//            string swaggerPath = Path.Combine(baseDir, "swagger.yaml");
+//            string programPath = Path.Combine(baseDir, "Program.cs");
+
+//            try
+//            {
+//                // Generowanie `appsettings.json`
+//                File.WriteAllText(appSettingsPath, $@"
+//                {{
+//                  ""ConnectionStrings"": {{
+//                    ""DefaultConnection"": ""Server=localhost;Database={className}Db;Trusted_Connection=True;""
+//                  }}
+//                }}
+//                ");
+
+//                                // Generowanie Program.cs (Swagger)
+//                                File.WriteAllText(programPath, $@"
+//                                    using Microsoft.AspNetCore.Builder;
+//                                    using Microsoft.Extensions.DependencyInjection;
+//                                    using Microsoft.Extensions.Hosting;
+
+//                                    var builder = WebApplication.CreateBuilder(args);
+
+//                                    builder.Services.AddControllers();
+//                                    builder.Services.AddEndpointsApiExplorer();
+//                                    builder.Services.AddSwaggerGen();
+
+//                                    var app = builder.Build();
+
+//                                    if (app.Environment.IsDevelopment())
+//                                    {{
+//                                        app.UseSwagger();
+//                                        app.UseSwaggerUI();
+//                                    }}
+
+//                                    app.UseAuthorization();
+//                                    app.MapControllers();
+//                                    app.Run();
+//                                    ");
+
+//                // Generowanie swagger.yaml
+//                File.WriteAllText(swaggerPath, $"openapi: 3.0.0\ninfo:\n  title: {className} API\n  version: 1.0.0");
+
+//                Console.WriteLine($"Projekt CRUD został wygenerowany w katalogu {baseDir}.");
+//            }
+//            catch (Exception ex)
+//            {
+//                Console.WriteLine("Błąd podczas przetwarzania: " + ex.Message);
+//            }
+//        }
+//    }
+//}
+
+
+//< Entities >
+//    < Employee >
+//        < FirstName type = "string" length = "100" > John </ FirstName >
+
+//           < LastName type = "string" length = "100" > Doe </ LastName >
+
+//              < Age type = "int" nullable = "true" > 30 </ Age >
+
+//                 < Salary type = "decimal" precision = "18,2" > 5000.50 </ Salary >
+
+//                    < BirthDate type = "datetime" > 1993 - 05 - 12 </ BirthDate >
+
+//                     < IsActive type = "bool" > true </ IsActive >
+
+//                      < Department type = "string" length = "50" > IT </ Department >
+
+//                     </ Employee >
+
+
+//                     < Department >
+
+//                         < Name type = "string" length = "100" > Human Resources </ Name >
+
+//                                < Budget type = "decimal" precision = "18,2" > 1000000.00 </ Budget >
+
+//                                   < CreatedAt type = "datetime" > 2024 - 01 - 01 </ CreatedAt >
+
+//                                    < IsActive type = "bool" > true </ IsActive >
+
+//                                 </ Department >
+//                             </ Entities >
+
+
+
+#region crud v2
+
+
+using System;
+using System.IO;
+using System.Xml.Linq;
+using System.Linq;
+using System.Text;
+using System.Collections.Generic;
+using System.Text.RegularExpressions;
+
+class Program
+{
+    static void Main()
+    {
+        Console.Write("Podaj ścieżkę do pliku XML: ");
+        string xmlPath = Console.ReadLine()?.Trim();
+
+        Console.Write("Podaj nazwę encji (np. Employee): ");
+        string className = Console.ReadLine()?.Trim();
+
+        var baseDir = "GeneratedProject";
+        var dirs = new[]
+        {
+            "Models", "Models/Validators", "Services", "Repositories", "Controllers"
+        };
+
+        foreach (var dir in dirs)
+            Directory.CreateDirectory(Path.Combine(baseDir, dir));
+
+        var xml = XDocument.Load(xmlPath);
+        var props = xml.Root?.Elements().First().Elements()
+            .Select(x => new Property
+            {
+                Name = x.Name.LocalName,
+                Type = x.Attribute("type")?.Value ?? "string",
+                Nullable = x.Attribute("nullable")?.Value == "true",
+                Length = x.Attribute("length")?.Value,
+                Precision = x.Attribute("precision")?.Value
+            }).ToList();
+
+        File.WriteAllText($"{baseDir}/Models/{className}.cs", GenModel(className, props));
+        File.WriteAllText($"{baseDir}/Models/{className}Entity.cs", GenEntity(className, props));
+        File.WriteAllText($"{baseDir}/Models/Validators/{className}Validator.cs", GenValidator(className, props));
+        File.WriteAllText($"{baseDir}/Repositories/I{className}Repository.cs", GenRepoInterface(className));
+        File.WriteAllText($"{baseDir}/Repositories/{className}Repository.cs", GenRepo(className));
+        File.WriteAllText($"{baseDir}/Services/I{className}Service.cs", GenServiceInterface(className));
+        File.WriteAllText($"{baseDir}/Services/{className}Service.cs", GenService(className));
+        File.WriteAllText($"{baseDir}/Controllers/{className}Controller.cs", GenController(className));
+
+        Console.WriteLine("✅ Wszystko wygenerowane!");
+    }
+
+    class Property
+    {
+        public string Name;
+        public string Type;
+        public bool Nullable;
+        public string Length;
+        public string Precision;
+    }
+
+    static string CSharpType(Property p) => p.Type.ToLower() switch
+    {
+        "int" => p.Nullable ? "int?" : "int",
+        "decimal" => p.Nullable ? "decimal?" : "decimal",
+        "datetime" => p.Nullable ? "DateTime?" : "DateTime",
+        "bool" => p.Nullable ? "bool?" : "bool",
+        _ => "string"
+    };
+
+    static string SCREAM(string s) => Regex.Replace(s, "([a-z])([A-Z])", "$1_$2").ToUpper();
+
+    static string GenModel(string n, List<Property> p) =>
+        $"public class {n}\n{{\n" + string.Join("\n", p.Select(x => $"    public {CSharpType(x)} {x.Name} {{ get; set; }}")) + "\n}";
+
+    static string GenEntity(string n, List<Property> p) =>
+        $"public class {n}Entity\n{{\n" + string.Join("\n", p.Select(x => $"    public {CSharpType(x)} {SCREAM(x.Name)} {{ get; set; }}")) + "\n}";
+
+    static string GenValidator(string n, List<Property> p)
+    {
+        var sb = new StringBuilder();
+        sb.AppendLine("using FluentValidation;");
+        sb.AppendLine($"public class {n}Validator : AbstractValidator<{n}>");
+        sb.AppendLine("{");
+        sb.AppendLine($"    public {n}Validator()");
+        sb.AppendLine("    {");
+        foreach (var x in p)
+        {
+            var rule = $"        RuleFor(x => x.{x.Name})";
+            if (x.Type == "string")
+            {
+                rule += ".NotEmpty()";
+                if (x.Length != null) rule += $".MaximumLength({x.Length})";
+            }
+            else if (x.Type == "int" || x.Type == "decimal")
+                rule += ".GreaterThanOrEqualTo(0)";
+            else if (x.Type == "datetime")
+                rule += ".LessThan(DateTime.Now)";
+            sb.AppendLine(rule + ";");
+        }
+        sb.AppendLine("    }");
+        sb.AppendLine("}");
+        return sb.ToString();
+    }
+
+    static string GenRepoInterface(string n) =>
+$@"public interface I{n}Repository
+{{
+    IEnumerable<{n}> GetAll();
+    {n} GetById(int id);
+    void Create({n} dto);
+    void Update(int id, {n} dto);
+    void Delete(int id);
+}}";
+
+    static string GenRepo(string n) =>
+$@"public class {n}Repository : I{n}Repository
+{{
+    private readonly List<{n}> _list = new();
+    public IEnumerable<{n}> GetAll() => _list;
+    public {n} GetById(int id) => _list.ElementAtOrDefault(id);
+    public void Create({n} dto) => _list.Add(dto);
+    public void Update(int id, {n} dto) => _list[id] = dto;
+    public void Delete(int id) => _list.RemoveAt(id);
+}}";
+
+    static string GenServiceInterface(string n) =>
+$@"public interface I{n}Service
+{{
+    IEnumerable<{n}> GetAll();
+    {n} GetById(int id);
+    void Create({n} dto);
+    void Update(int id, {n} dto);
+    void Delete(int id);
+}}";
+
+    static string GenService(string n) =>
+$@"public class {n}Service : I{n}Service
+{{
+    private readonly I{n}Repository _repo;
+    public {n}Service(I{n}Repository repo) => _repo = repo;
+    public IEnumerable<{n}> GetAll() => _repo.GetAll();
+    public {n} GetById(int id) => _repo.GetById(id);
+    public void Create({n} dto) => _repo.Create(dto);
+    public void Update(int id, {n} dto) => _repo.Update(id, dto);
+    public void Delete(int id) => _repo.Delete(id);
+}}";
+
+    static string GenController(string n) =>
+$@"using Microsoft.AspNetCore.Mvc;
+
+[ApiController]
+[Route(""api/[controller]"")]
+public class {n}Controller : ControllerBase
+{{
+    private readonly I{n}Service _service;
+    public {n}Controller(I{n}Service service) => _service = service;
+
+    [HttpGet] public IActionResult GetAll() => Ok(_service.GetAll());
+    [HttpGet(""{{id}}"")] public IActionResult GetById(int id) => Ok(_service.GetById(id));
+    [HttpPost] public IActionResult Create([{""}FromBody] {n} dto) {{ _service.Create(dto); return Ok(); }}
+    [HttpPut(""{{id}}"")] public IActionResult Update(int id, [{""}FromBody] {n} dto) {{ _service.Update(id, dto); return NoContent(); }}
+    [HttpDelete(""{{id}}"")] public IActionResult Delete(int id) {{ _service.Delete(id); return NoContent(); }}
+}}";
+}
+
+
+
+
+
+#endregion
+
+
+#region crud with sql
+using System;
+using System.IO;
+using System.Linq;
+using System.Text;
+using System.Xml.Linq;
+using System.Collections.Generic;
+using System.Text.RegularExpressions;
+
+class Program
+{
+    static void Main()
+    {
+        Console.Write("Podaj ścieżkę do pliku XML: ");
+        string xmlPath = Console.ReadLine()?.Trim();
+
+        if (string.IsNullOrWhiteSpace(xmlPath) || !File.Exists(xmlPath))
+        {
+            Console.WriteLine("Nieprawidłowa ścieżka do pliku XML.");
+            return;
+        }
+
+        Console.Write("Podaj nazwę encji (np. Employee): ");
+        string className = Console.ReadLine()?.Trim();
+
+        if (string.IsNullOrWhiteSpace(className))
+        {
+            Console.WriteLine("Nazwa klasy nie może być pusta.");
+            return;
+        }
+
+        // Folder structure
+        string baseDir = "GeneratedProject";
+        string[] folders = { "Models", "Repositories", "Services", "Controllers", "Data", "Tests" };
+        foreach (var folder in folders)
+            Directory.CreateDirectory(Path.Combine(baseDir, folder));
+
+        // File paths
+        string modelPath = Path.Combine(baseDir, "Models", $"{className}.cs");
+        string entityPath = Path.Combine(baseDir, "Models", $"{className}Entity.cs");
+        string sqlPath = Path.Combine(baseDir, $"{className}.sql");
+        string repoInterfacePath = Path.Combine(baseDir, "Repositories", $"I{className}Repository.cs");
+        string repoPath = Path.Combine(baseDir, "Repositories", $"{className}Repository.cs");
+        string serviceInterfacePath = Path.Combine(baseDir, "Services", $"I{className}Service.cs");
+        string servicePath = Path.Combine(baseDir, "Services", $"{className}Service.cs");
+        string controllerPath = Path.Combine(baseDir, "Controllers", $"{className}Controller.cs");
+        string dbContextPath = Path.Combine(baseDir, "Data", "ApplicationDbContext.cs");
+        string appSettingsPath = Path.Combine(baseDir, "appsettings.json");
+        string swaggerPath = Path.Combine(baseDir, "swagger.yaml");
+        string testPath = Path.Combine(baseDir, "Tests", $"{className}ServiceTests.cs");
+
+        // Read and parse XML
+        XDocument xmlDoc = XDocument.Load(xmlPath);
+        var entity = xmlDoc.Root?.Elements().FirstOrDefault();
+        if (entity == null)
+        {
+            Console.WriteLine("Brak encji w pliku XML.");
+            return;
+        }
+
+        var properties = new List<PropertyInfo>();
+        foreach (var prop in entity.Elements())
+        {
+            string name = prop.Name.LocalName;
+            string type = prop.Attribute("type")?.Value ?? "string";
+            string? length = prop.Attribute("length")?.Value;
+            string? precision = prop.Attribute("precision")?.Value;
+            bool nullable = prop.Attribute("nullable")?.Value == "true";
+
+            properties.Add(new PropertyInfo
+            {
+                Name = name,
+                XmlType = type,
+                Length = length,
+                Precision = precision,
+                Nullable = nullable
+            });
+        }
+
+        // Generate files
+        File.WriteAllText(modelPath, GenerateModel(className, properties));
+        File.WriteAllText(entityPath, GenerateEntity(className, properties));
+        File.WriteAllText(sqlPath, GenerateSql(className, properties));
+        File.WriteAllText(repoInterfacePath, $"public interface I{className}Repository {{\n{GenerateCrudSignatures(className)}\n}}");
+        File.WriteAllText(repoPath, GenerateRepository(className));
+        File.WriteAllText(serviceInterfacePath, $"public interface I{className}Service {{\n{GenerateCrudSignatures(className)}\n}}");
+        File.WriteAllText(servicePath, GenerateService(className));
+        File.WriteAllText(controllerPath, GenerateController(className));
+        File.WriteAllText(dbContextPath, GenerateDbContext(className));
+        File.WriteAllText(appSettingsPath, GenerateAppSettings(className));
+        File.WriteAllText(swaggerPath, GenerateSwaggerYaml(className));
+        File.WriteAllText(testPath, GenerateTest(className));
+
+        Console.WriteLine("✅ Wygenerowano projekt w katalogu: " + baseDir);
+    }
+
+    record PropertyInfo(string Name, string XmlType, string? Length, string? Precision, bool Nullable);
+
+    static string GenerateModel(string name, List<PropertyInfo> props) =>
+        $"public class {name}\n{{\n" +
+        string.Join("\n", props.Select(p => $"    public {ToCSharpType(p)} {p.Name} {{ get; set; }}")) +
+        "\n}";
+
+    static string GenerateEntity(string name, List<PropertyInfo> props) =>
+        $"public class {name}Entity\n{{\n" +
+        string.Join("\n", props.Select(p => $"    public {ToCSharpType(p)} {ToScreamingSnake(p.Name)} {{ get; set; }}")) +
+        "\n}";
+
+    static string GenerateSql(string table, List<PropertyInfo> props)
+    {
+        var sb = new StringBuilder();
+        sb.AppendLine($"CREATE TABLE {table} (");
+        sb.AppendLine("    ID INT IDENTITY(1,1) PRIMARY KEY,");
+        foreach (var p in props)
+        {
+            sb.AppendLine($"    {ToScreamingSnake(p.Name)} {ToSqlType(p)} {(p.Nullable ? "NULL" : "NOT NULL")},");
+        }
+        return sb.ToString().TrimEnd(',', '\n') + "\n);";
+    }
+
+    static string GenerateRepository(string name) =>
+$@"public class {name}Repository : I{name}Repository
+{{
+    private readonly ApplicationDbContext _context;
+
+    public {name}Repository(ApplicationDbContext context) => _context = context;
+
+    public IEnumerable<{name}Entity> GetAll() => _context.{name}s.ToList();
+    public {name}Entity GetById(int id) => _context.{name}s.Find(id);
+    public void Add({name}Entity entity) {{ _context.{name}s.Add(entity); _context.SaveChanges(); }}
+    public void Update(int id, {name}Entity entity) {{ _context.{name}s.Update(entity); _context.SaveChanges(); }}
+    public void Delete(int id) {{ var e = _context.{name}s.Find(id); _context.{name}s.Remove(e); _context.SaveChanges(); }}
+}}";
+
+    static string GenerateService(string name) =>
+$@"public class {name}Service : I{name}Service
+{{
+    private readonly I{name}Repository _repo;
+
+    public {name}Service(I{name}Repository repo) => _repo = repo;
+
+    public IEnumerable<{name}Entity> GetAll() => _repo.GetAll();
+    public {name}Entity GetById(int id) => _repo.GetById(id);
+    public void Add({name}Entity entity) => _repo.Add(entity);
+    public void Update(int id, {name}Entity entity) => _repo.Update(id, entity);
+    public void Delete(int id) => _repo.Delete(id);
+}}";
+
+    static string GenerateController(string name) =>
+$@"[ApiController]
+[Route(""api/[controller]"")]
+public class {name}Controller : ControllerBase
+{{
+    private readonly I{name}Service _service;
+
+    public {name}Controller(I{name}Service service) => _service = service;
+
+    [HttpGet] public IActionResult GetAll() => Ok(_service.GetAll());
+    [HttpGet(""{{id}}"")] public IActionResult GetById(int id) => Ok(_service.GetById(id));
+    [HttpPost] public IActionResult Create([FromBody] {name}Entity e) {{ _service.Add(e); return Ok(); }}
+    [HttpPut(""{{id}}"")] public IActionResult Update(int id, [FromBody] {name}Entity e) {{ _service.Update(id, e); return NoContent(); }}
+    [HttpDelete(""{{id}}"")] public IActionResult Delete(int id) {{ _service.Delete(id); return NoContent(); }}
+}}";
+
+    static string GenerateDbContext(string name) =>
+$@"using Microsoft.EntityFrameworkCore;
+public class ApplicationDbContext : DbContext
+{{
+    public DbSet<{name}Entity> {name}s {{ get; set; }}
+    public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options) {{ }}
+}}";
+
+    static string GenerateAppSettings(string db) =>
+$@"{{
+  ""ConnectionStrings"": {{
+    ""DefaultConnection"": ""Server=localhost;Database={db}Db;Trusted_Connection=True;""
+  }}
+}}";
+
+    static string GenerateSwaggerYaml(string entity) =>
+$@"openapi: 3.0.0
+info:
+  title: {entity} API
+  version: 1.0.0";
+
+    static string GenerateTest(string name) =>
+$@"using NUnit.Framework;
+using Moq;
+using System.Collections.Generic;
+using System.Linq;
+
+[TestFixture]
+public class {name}ServiceTests
+{{
+    [Test]
+    public void GetAll_ShouldReturnData()
+    {{
+        var mock = new Mock<I{name}Repository>();
+        mock.Setup(x => x.GetAll()).Returns(new List<{name}Entity> {{ new {name}Entity() }});
+        var service = new {name}Service(mock.Object);
+        var result = service.GetAll();
+        Assert.IsNotEmpty(result);
+    }}
+}}";
+
+    static string GenerateCrudSignatures(string name) =>
+$@"    IEnumerable<{name}Entity> GetAll();
+    {name}Entity GetById(int id);
+    void Add({name}Entity entity);
+    void Update(int id, {name}Entity entity);
+    void Delete(int id);";
+
+    static string ToCSharpType(PropertyInfo p) => (p.XmlType.ToLower()) switch
+    {
+        "int" => p.Nullable ? "int?" : "int",
+        "decimal" => p.Nullable ? "decimal?" : "decimal",
+        "datetime" => p.Nullable ? "DateTime?" : "DateTime",
+        "bool" => p.Nullable ? "bool?" : "bool",
+        _ => "string"
+    };
+
+    static string ToSqlType(PropertyInfo p) => (p.XmlType.ToLower()) switch
+    {
+        "int" => "INT",
+        "decimal" => p.Precision != null ? $"DECIMAL({p.Precision})" : "DECIMAL(18,2)",
+        "datetime" => "DATETIME",
+        "bool" => "BIT",
+        "string" => p.Length != null ? $"NVARCHAR({p.Length})" : "NVARCHAR(255)",
+        _ => "NVARCHAR(255)"
+    };
+
+    static string ToScreamingSnake(string input) => Regex.Replace(input, "([a-z])([A-Z])", "$1_$2").ToUpper();
+}
+
+
+
+
+pipeline
+{
+    agent any
+
+    options {
+        skipDefaultCheckout()
+    }
+
+    stages {
+        stage('Clean Workspace') {
+            steps {
+                deleteDir()
+            }
+        }
+
+        stage('Restore .NET Solution') {
+            steps {
+                bat 'MSBuild.exe /t:Restore D:\\jenkins_slave\\workspace\\OptyNew_ProjectCommon\\Optymalizator\\Migracja\\Optymalizator.NG.sln'
+            }
+        }
+
+        stage('npm install') {
+            steps {
+                bat 'cd D:\\jenkins_slave\\workspace\\OptyNew_ProjectCommon\\Optymalizator\\Migracja\\Optymalizator.Web.Client && npm install'
+            }
+        }
+
+        stage('Create Output Folders') {
+            steps {
+                bat 'cd D:\\jenkins_slave\\workspace\\OptyNew_ProjectCommon && md OPTY\\ServerApp\\net6 && md OPTY\\ServerApp\\netFramework && md OPTY\\ServerDB'
+            }
+        }
+
+        stage('npm build') {
+            steps {
+                bat 'cd D:\\jenkins_slave\\workspace\\OptyNew_ProjectCommon\\Optymalizator\\Migracja\\Optymalizator.Web.Client && npm run build'
+            }
+        }
+
+        stage('Restore NuGet Packages') {
+            steps {
+                bat '''D:\\jenkins_slave\\workspace\\OptyNew_ProjectCommon\\Optymalizator\\.nuget\\NuGet.exe restore -MSBuildVersion 17.4.1.60106 "D:\\jenkins_slave\\workspace\\OptyNew_ProjectCommon\\Optymalizator\\Optymalizator.sln" -verbosity detailed'''
+            }
+        }
+
+        stage('Install PopperJS') {
+            steps {
+                bat 'cd D:\\jenkins_slave\\workspace\\OptyNew_ProjectCommon\\Optymalizator\\Optymalizator.Web\\Scripts && npm i @popperjs/core@2.11.6'
+            }
+        }
+
+        stage('Prepare Angular Output') {
+            steps {
+                bat '''xcopy D:\\jenkins_slave\\workspace\\OptyNew_ProjectCommon\\Optymalizator\\Migracja\\Optymalizator.Web.NG\\AngularClient D:\\jenkins_slave\\workspace\\OptyNew_ProjectCommon\\OPTY\\ServerApp\\net6\\AngularClient /e /i /h'''
+            }
+        }
+
+        stage('Clean IIS Directory: OPTY_DEV_NET6') {
+            steps {
+                bat 'pushd \\\\10.158.41.77\\c$\\inetpub\\wwwroot\\OPTY_DEV_NET6 && rd /s /q . 2>nul'
+            }
+        }
+
+        stage('Clean IIS Directory: OPTY_DEV_2') {
+            steps {
+                bat 'pushd \\\\10.158.41.77\\c$\\inetpub\\wwwroot\\OPTY_DEV_2 && rd /s /q . 2>nul'
+            }
+        }
+    }
+
+    post {
+        failure {
+            echo 'Build failed.'
+        }
+        success {
+            echo 'Build succeeded.'
+        }
+    }
+}
+
+
+
+
+
+
+
+#endregion
+
+
+
+
+//new
+
+pipeline
+{
+    agent {
+        label 'windows16_optydev_slave'
+    }
+
+    environment {
+        GIT_REPO = 'https://code.pkobp.pl/dat_optymalizator/optymalizator.git'
+        BRANCH = '*/feature/develop_NET6_Jenkins_Test'
+    }
+
+    options {
+        skipDefaultCheckout()
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                git branch: "${BRANCH}",
+                    url: "${GIT_REPO}",
+                    credentialsId: 'vault_gitlab_user_passwd'
+            }
+        }
+
+        stage('Restore Solution') {
+            steps {
+                bat 'MSBuild.exe /t:Restore D:\\jenkins_slave\\workspace\\OptyNew_ProjectCommon\\Optymalizator\\Migracja\\Optymalizator.N6.sln'
+            }
+        }
+
+        stage('npm install & build web.Client') {
+            steps {
+                bat 'cd D:\\jenkins_slave\\workspace\\OptyNew_ProjectCommon\\Optymalizator\\Migracja\\Optymalizator.Web.Client && npm install && npm run build'
+            }
+        }
+
+        stage('NuGet restore and npm install in Scripts') {
+            steps {
+                bat '''
+                D:\\jenkins_slave\\workspace\\OptyNew_ProjectCommon\\Optymalizator\\.nuget\\NuGet.exe restore -MSBuildVersion 17.4.1.60106 "D:\\jenkins_slave\\workspace\\OptyNew_ProjectCommon\\Optymalizator\\optymalizator.sln" - verbosity detailed
+                 cd D:\\jenkins_slave\\workspace\\OptyNew_ProjectCommon\\Optymalizator\\Web\\Scripts && npm i @popperjs/ core@2.11.6
+                '''
+            }
+        }
+
+        stage('Create directories') {
+            steps {
+                bat '''
+                cd D:\\jenkins_slave\\workspace\\OptyNew_ProjectCommon
+                md OPTY\\ServerApp\\net6\\AngularClient
+                md OPTY\\ServerApp\\netFramework
+                md OPTY\\ServerDB
+                '''
+            }
+        }
+
+        stage('Copy AngularClient build') {
+            steps {
+                bat '''
+                xcopy D:\\jenkins_slave\\workspace\\OptyNew_ProjectCommon\\Optymalizator\\Migracja\\Optymalizator.Web.N6\\AngularClient D:\\jenkins_slave\\workspace\\OptyNew_ProjectCommon\\OPTY\\ServerApp\\net6\\AngularClient / e / i / h
+                '''
+            }
+        }
+
+        stage('Clean remote DEV folders') {
+            steps {
+                bat '''
+                pushd \\\\10.158.41.77\\c$\\inetpub\\wwwroot\\OPTY_DEV_NET6 && rd / s / q. 2 > nul
+                pushd \\\\10.158.41.77\\c$\\inetpub\\wwwroot\\OPTY_DEV_2 && rd / s / q. 2 > nul
+                '''
+            }
+        }
+
+        stage('Copy to DEV server') {
+            steps {
+                bat '''
+                cd D:\\jenkins_slave\\workspace\\OptyNew_ProjectCommon
+                xcopy D:\\jenkins_slave\\workspace\\OptyNew_ProjectCommon\\OPTY\\ServerApp\\net6 \\\\10.158.41.77\\c$\\inetpub\\wwwroot\\OPTY_DEV_NET6 / E / I / Y
+                xcopy D:\\jenkins_slave\\workspace\\OptyNew_ProjectCommon\\OPTY\\ServerApp\\netFramework \\\\10.158.41.77\\c$\\inetpub\\wwwroot\\OPTY_DEV_2 / E / I / Y
+                '''
+            }
+        }
+
+        stage('Clean config folder') {
+            steps {
+                bat 'rmdir /S /Q "D:\\jenkins_slave\\workspace\\OptyNew_ProjectCommon\\OPTY\\ServerApp\\net6\\config"'
+            }
+        }
+
+        stage('Generate DACPAC & execute SQL script') {
+            steps {
+                bat '''
+                cd D:\\jenkins_slave\\workspace\\OptyNew_ProjectCommon\\Optymalizator\\Generate_dacpac_2016\\sqlpackage && generateReportAndScriptDacp.bat
+                D:\\jenkins_slave\\workspace\\OptyNew_ProjectCommon\\Optymalizator\\Database\\bin\\Release\\Optymalizator.Database.dacpac
+                D:\\jenkins_slave\\workspace\\OptyNew_ProjectCommon\\Optymalizator\\Generate_dacpac_2016\\sqlpackage\\Profile_TEST.xml
+                D:\\jenkins_slave\\workspace\\OptyNew_ProjectCommon\\OPTY\\ServerDB\\script.sql
+                '''
+            }
+        }
+
+        stage('Create archive') {
+            steps {
+                bat '''
+                cd D:\\jenkins_slave\\workspace\\OptyNew_ProjectCommon
+                "C:\\Program Files\\WinRAR\\WinRAR.exe" a -afzip -df \\\\10.158.41.77\\c$\\jenkins_slave\\workspace\\OptyNew_ProjectCommon\\OPTY_TEST.zip OPTY_TEST
+                '''
+            }
+        }
+    }
+}
+
+
+                // new with nuget
+                pipeline {
+    agent {
+        label 'windows16_optydev_slave'
+    }
+
+    environment {
+        NUGET_EXE = 'nuget'
+        MSBUILD_EXE = 'MSBuild.exe'
+        SOLUTION_PATH = 'Optymalizator\\Migracja\\Optymalizator.N6.sln'
+        CLIENT_PATH = 'Optymalizator\\Migracja\\Optymalizator.Web.Client'
+        ANGULAR_BUILD_PATH = 'Optymalizator\\Migracja\\Optymalizator.Web.N6\\AngularClient'
+        SERVER_APP_PATH = 'OPTY\\ServerApp'
+        DEPLOY_NET6 = '\\\\10.158.41.77\\c$\\inetpub\\wwwroot\\OPTY_DEV_NET6'
+        DEPLOY_NETFRAMEWORK = '\\\\10.158.41.77\\c$\\inetpub\\wwwroot\\OPTY_DEV_2'
+        ZIP_PATH = '\\\\10.158.41.77\\c$\\jenkins_slave\\workspace\\OptyNew_ProjectCommon\\OPTY_TEST.zip'
+    }
+
+    stages {
+        stage('Checkout Code') {
+            steps {
+                git branch: 'feature/develop_NET6_Jenkins_Test',
+                    url: 'https://code.pkobp.pl/dat_optymalizator/optymalizator.git',
+                    credentialsId: 'vault_gitlab_user_passwd'
+            }
+        }
+
+        stage('Generate nuget.config (DevExpress)') {
+            steps {
+                withCredentials([string(credentialsId: 'devexpress_nuget_token', variable: 'DEVEXPRESS_TOKEN')]) {
+                    bat """
+                    echo ^<?xml version="1.0" encoding="utf-8"?^> > nuget.config
+                    echo ^<configuration^> >> nuget.config
+                    echo   ^<packageSources^> >> nuget.config
+                    echo     ^<add key="DevExpress" value="https://nuget.devexpress.com/%DEVEXPRESS_TOKEN%/api" /^> >> nuget.config
+                    echo     ^<add key="NuGet.org" value="https://api.nuget.org/v3/index.json" /^> >> nuget.config
+                    echo   ^</packageSources^> >> nuget.config
+                    echo ^</configuration^> >> nuget.config
+                    """
+                }
+            }
+        }
+
+        stage('Restore NuGet Packages') {
+            steps {
+                bat '%NUGET_EXE% restore %SOLUTION_PATH% -ConfigFile nuget.config'
+            }
+        }
+
+        stage('npm install & build Angular') {
+            steps {
+                bat "cd %CLIENT_PATH% && npm install && npm run build"
+            }
+        }
+
+        stage('Create Deployment Folders') {
+            steps {
+                bat """
+                md OPTY\\ServerApp\\net6\\AngularClient
+                md OPTY\\ServerApp\\netFramework
+                md OPTY\\ServerDB
+                """
+            }
+        }
+
+        stage('Copy Angular Build') {
+            steps {
+                bat "xcopy %ANGULAR_BUILD_PATH% %SERVER_APP_PATH%\\net6\\AngularClient /E /I /H"
+            }
+        }
+
+        stage('Clear Remote Folders') {
+            steps {
+                bat """
+                pushd %DEPLOY_NET6% && rd /s /q . 2>nul
+                pushd %DEPLOY_NETFRAMEWORK% && rd /s /q . 2>nul
+                """
+            }
+        }
+
+        stage('Copy to Remote DEV Server') {
+            steps {
+                bat """
+                xcopy OPTY\\ServerApp\\net6 %DEPLOY_NET6% /E /I /Y
+                xcopy OPTY\\ServerApp\\netFramework %DEPLOY_NETFRAMEWORK% /E /I /Y
+                """
+            }
+        }
+
+        stage('Remove Config Folder (optional)') {
+            steps {
+                bat 'rmdir /S /Q "OPTY\\ServerApp\\net6\\config"'
+            }
+        }
+
+        stage('Generate DACPAC & SQL Script') {
+            steps {
+                bat """
+                cd Optymalizator\\Generate_dacpac_2016\\sqlpackage
+                generateReportAndScriptDacp.bat ^
+                ..\\..\\Database\\bin\\Release\\Optymalizator.Database.dacpac ^
+                Profile_TEST.xml ^
+                ..\\..\\..\\OPTY\\ServerDB\\script.sql
+                """
+            }
+        }
+
+        stage('Create ZIP Archive') {
+            steps {
+                bat "\"C:\\Program Files\\WinRAR\\WinRAR.exe\" a -afzip -df %ZIP_PATH% OPTY_TEST"
+            }
+        }
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
